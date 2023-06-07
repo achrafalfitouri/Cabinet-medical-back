@@ -35,14 +35,14 @@ class Ordonance
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?patient $patient = null;
+    private ?Patient $patient = null;
 
-    #[ORM\ManyToMany(targetEntity: medicament::class)]
+    #[ORM\ManyToMany(targetEntity: Medicament::class)]
     private Collection $medicament;
 
     #[ORM\ManyToOne(inversedBy: 'ordonances')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?utilisateur $utilisateur = null;
+    private ?Utilisateur $utilisateur = null;
 
     public function __construct()
     {
@@ -114,12 +114,12 @@ class Ordonance
         return $this;
     }
 
-    public function getPatient(): ?patient
+    public function getPatient(): ?Patient
     {
         return $this->patient;
     }
 
-    public function setPatient(?patient $patient): self
+    public function setPatient(?Patient $patient): self
     {
         $this->patient = $patient;
 
@@ -134,7 +134,7 @@ class Ordonance
         return $this->medicament;
     }
 
-    public function addMedicament(medicament $medicament): self
+    public function addMedicament(Medicament $medicament): self
     {
         if (!$this->medicament->contains($medicament)) {
             $this->medicament->add($medicament);
@@ -143,19 +143,19 @@ class Ordonance
         return $this;
     }
 
-    public function removeMedicament(medicament $medicament): self
+    public function removeMedicament(Medicament $medicament): self
     {
         $this->medicament->removeElement($medicament);
 
         return $this;
     }
 
-    public function getUtilisateur(): ?utilisateur
+    public function getUtilisateur(): ?Utilisateur
     {
         return $this->utilisateur;
     }
 
-    public function setUtilisateur(?utilisateur $utilisateur): self
+    public function setUtilisateur(?Utilisateur $utilisateur): self
     {
         $this->utilisateur = $utilisateur;
 

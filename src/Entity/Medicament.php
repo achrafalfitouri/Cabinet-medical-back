@@ -33,11 +33,11 @@ class Medicament
 
     #[ORM\ManyToOne(inversedBy: 'medicaments')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?utilisateur $utilisateur = null;
+    private ?Utilisateur $utilisateur = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?categoriem $categoriem = null;
+    private ?Categoriem $categoriem = null;
 
     public function getId(): ?int
     {
@@ -104,24 +104,24 @@ class Medicament
         return $this;
     }
 
-    public function getUtilisateur(): ?utilisateur
+    public function getUtilisateur(): ?Utilisateur
     {
         return $this->utilisateur;
     }
 
-    public function setUtilisateur(?utilisateur $utilisateur): self
+    public function setUtilisateur(?Utilisateur $utilisateur): self
     {
         $this->utilisateur = $utilisateur;
 
         return $this;
     }
 
-    public function getCategoriem(): ?categoriem
+    public function getCategoriem(): ?Categoriem
     {
         return $this->categoriem;
     }
 
-    public function setCategoriem(?categoriem $categoriem): self
+    public function setCategoriem(?Categoriem $categoriem): self
     {
         $this->categoriem = $categoriem;
 

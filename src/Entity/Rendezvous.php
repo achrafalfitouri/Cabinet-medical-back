@@ -36,11 +36,11 @@ class Rendezvous
 
     #[ORM\ManyToOne(inversedBy: 'rendezvouses')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?utilisateur $utilisateur = null;
+    private ?Utilisateur $utilisateur = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?patient $patient = null;
+    private ?Patient $patient = null;
 
     public function getId(): ?int
     {
@@ -119,24 +119,24 @@ class Rendezvous
         return $this;
     }
 
-    public function getUtilisateur(): ?utilisateur
+    public function getUtilisateur(): ?Utilisateur
     {
         return $this->utilisateur;
     }
 
-    public function setUtilisateur(?utilisateur $utilisateur): self
+    public function setUtilisateur(?Utilisateur $utilisateur): self
     {
         $this->utilisateur = $utilisateur;
 
         return $this;
     }
 
-    public function getPatient(): ?patient
+    public function getPatient(): ?Patient
     {
         return $this->patient;
     }
 
-    public function setPatient(?patient $patient): self
+    public function setPatient(?Patient $patient): self
     {
         $this->patient = $patient;
 

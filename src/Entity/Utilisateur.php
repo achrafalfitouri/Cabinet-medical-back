@@ -25,7 +25,8 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $email = null;
 
     #[ORM\Column]
-    private array $roles = [];
+    private ?array $roles = null;
+   
 
     /**
      * @var string The hashed password
@@ -68,6 +69,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __construct()
     {
+        $this->roles = $roles ?? ["medecin", "reception", "admin"];
         $this->rendezvouses = new ArrayCollection();
         $this->patients = new ArrayCollection();
         $this->ordonances = new ArrayCollection();

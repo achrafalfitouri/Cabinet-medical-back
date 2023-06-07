@@ -33,11 +33,11 @@ class Examenresultat
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
-    private ?examentest $examentest = null;
+    private ?Examentest $examentest = null;
 
     #[ORM\ManyToOne(inversedBy: 'examenresultats')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?utilisateur $utilisateur = null;
+    private ?Utilisateur $utilisateur = null;
 
     public function getId(): ?int
     {
@@ -104,24 +104,24 @@ class Examenresultat
         return $this;
     }
 
-    public function getExamentest(): ?examentest
+    public function getExamentest(): ?Examentest
     {
         return $this->examentest;
     }
 
-    public function setExamentest(examentest $examentest): self
+    public function setExamentest(Examentest $examentest): self
     {
         $this->examentest = $examentest;
 
         return $this;
     }
 
-    public function getUtilisateur(): ?utilisateur
+    public function getUtilisateur(): ?Utilisateur
     {
         return $this->utilisateur;
     }
 
-    public function setUtilisateur(?utilisateur $utilisateur): self
+    public function setUtilisateur(?Utilisateur $utilisateur): self
     {
         $this->utilisateur = $utilisateur;
 
