@@ -32,7 +32,7 @@ class Patient
 
     #[ORM\ManyToOne(inversedBy: 'patients')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Utilisateur $utilisateur = null;
+    private ?User $user = null;
 
     #[ORM\Column(length: 255)]
     private ?string $email = null;
@@ -105,14 +105,14 @@ class Patient
         return $this;
     }
 
-    public function getUtilisateur(): ?Utilisateur
+    public function getUser(): ?User
     {
-        return $this->utilisateur;
+        return $this->user;
     }
 
-    public function setUtilisateur(?Utilisateur $utilisateur): self
+    public function setUser(?User $user): self
     {
-        $this->utilisateur = $utilisateur;
+        $this->user = $user;
 
         return $this;
     }
