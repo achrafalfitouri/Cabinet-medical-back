@@ -2,19 +2,16 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
-
-use App\Repository\UtilisateurRepository;
+use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-#[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
-#[ApiResource]
-class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
+#[ORM\Entity(repositoryClass: UserRepository::class)]
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -25,7 +22,8 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $email = null;
 
     #[ORM\Column]
-    private ?array $roles = null;
+    private array $roles = [];
+
    
 
     /**
@@ -33,6 +31,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\Column]
     private ?string $password = null;
+
 
     #[ORM\Column(length: 100)]
     private ?string $nom = null;
@@ -46,27 +45,28 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column (options: ['default' => 'CURRENT_TIMESTAMP'])]
     private ?\DateTimeImmutable $created_at = null;
 
-    #[ORM\OneToMany(mappedBy: 'utilisateur', targetEntity: Rendezvous::class)]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Rendezvous::class)]
     private Collection $rendezvouses;
 
-    #[ORM\OneToMany(mappedBy: 'utilisateur', targetEntity: Patient::class)]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Patient::class)]
     private Collection $patients;
 
-    #[ORM\OneToMany(mappedBy: 'utilisateur', targetEntity: Ordonance::class)]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Ordonance::class)]
     private Collection $ordonances;
 
-    #[ORM\OneToMany(mappedBy: 'utilisateur', targetEntity: Medicament::class)]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Medicament::class)]
     private Collection $medicaments;
 
-    #[ORM\OneToMany(mappedBy: 'utilisateur', targetEntity: Categoriem::class)]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Categoriem::class)]
     private Collection $categoriems;
 
-    #[ORM\OneToMany(mappedBy: 'utilisateur', targetEntity: Examentest::class)]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Examentest::class)]
     private Collection $examentests;
 
-    #[ORM\OneToMany(mappedBy: 'utilisateur', targetEntity: Examenresultat::class)]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Examenresultat::class)]
     private Collection $examenresultats;
-
+    
+    
     public function __construct()
     {
         $this->roles = $roles ?? ["medecin", "reception", "admin"];
@@ -79,7 +79,8 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         $this->examenresultats = new ArrayCollection();
     }
 
-    
+
+
     public function getId(): ?int
     {
         return $this->id;
@@ -96,6 +97,8 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+
 
     /**
      * A visual identifier that represents this user.
@@ -149,7 +152,6 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
     }
-
     public function getNom(): ?string
     {
         return $this->nom;
@@ -210,7 +212,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->rendezvouses->contains($rendezvouse)) {
             $this->rendezvouses->add($rendezvouse);
-            $rendezvouse->setUtilisateur($this);
+            $rendezvouse->setUser($this);
         }
 
         return $this;
@@ -220,8 +222,8 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->rendezvouses->removeElement($rendezvouse)) {
             // set the owning side to null (unless already changed)
-            if ($rendezvouse->getUtilisateur() === $this) {
-                $rendezvouse->setUtilisateur(null);
+            if ($rendezvouse->getUser() === $this) {
+                $rendezvouse->setUser(null);
             }
         }
 
@@ -240,7 +242,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->patients->contains($patient)) {
             $this->patients->add($patient);
-            $patient->setUtilisateur($this);
+            $patient->setUser($this);
         }
 
         return $this;
@@ -250,8 +252,8 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->patients->removeElement($patient)) {
             // set the owning side to null (unless already changed)
-            if ($patient->getUtilisateur() === $this) {
-                $patient->setUtilisateur(null);
+            if ($patient->getUser() === $this) {
+                $patient->setUser(null);
             }
         }
 
@@ -270,7 +272,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->ordonances->contains($ordonance)) {
             $this->ordonances->add($ordonance);
-            $ordonance->setUtilisateur($this);
+            $ordonance->setUser($this);
         }
 
         return $this;
@@ -280,8 +282,8 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->ordonances->removeElement($ordonance)) {
             // set the owning side to null (unless already changed)
-            if ($ordonance->getUtilisateur() === $this) {
-                $ordonance->setUtilisateur(null);
+            if ($ordonance->getUser() === $this) {
+                $ordonance->setUser(null);
             }
         }
 
@@ -300,7 +302,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->medicaments->contains($medicament)) {
             $this->medicaments->add($medicament);
-            $medicament->setUtilisateur($this);
+            $medicament->setUser($this);
         }
 
         return $this;
@@ -310,8 +312,8 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->medicaments->removeElement($medicament)) {
             // set the owning side to null (unless already changed)
-            if ($medicament->getUtilisateur() === $this) {
-                $medicament->setUtilisateur(null);
+            if ($medicament->getUser() === $this) {
+                $medicament->setUser(null);
             }
         }
 
@@ -330,7 +332,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->categoriems->contains($categoriem)) {
             $this->categoriems->add($categoriem);
-            $categoriem->setUtilisateur($this);
+            $categoriem->setUser($this);
         }
 
         return $this;
@@ -340,8 +342,8 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->categoriems->removeElement($categoriem)) {
             // set the owning side to null (unless already changed)
-            if ($categoriem->getUtilisateur() === $this) {
-                $categoriem->setUtilisateur(null);
+            if ($categoriem->getUser() === $this) {
+                $categoriem->setUser(null);
             }
         }
 
@@ -360,7 +362,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->examentests->contains($examentest)) {
             $this->examentests->add($examentest);
-            $examentest->setUtilisateur($this);
+            $examentest->setUser($this);
         }
 
         return $this;
@@ -370,8 +372,8 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->examentests->removeElement($examentest)) {
             // set the owning side to null (unless already changed)
-            if ($examentest->getUtilisateur() === $this) {
-                $examentest->setUtilisateur(null);
+            if ($examentest->getUser() === $this) {
+                $examentest->setUser(null);
             }
         }
 
@@ -390,7 +392,7 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if (!$this->examenresultats->contains($examenresultat)) {
             $this->examenresultats->add($examenresultat);
-            $examenresultat->setUtilisateur($this);
+            $examenresultat->setUser($this);
         }
 
         return $this;
@@ -400,13 +402,15 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->examenresultats->removeElement($examenresultat)) {
             // set the owning side to null (unless already changed)
-            if ($examenresultat->getUtilisateur() === $this) {
-                $examenresultat->setUtilisateur(null);
+            if ($examenresultat->getUser() === $this) {
+                $examenresultat->setUser(null);
             }
         }
 
         return $this;
     }
 
-   
 }
+
+
+
