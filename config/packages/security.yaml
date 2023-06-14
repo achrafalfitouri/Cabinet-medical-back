@@ -11,23 +11,22 @@ security:
                 class: App\Entity\User
                 property: email
     firewalls:
-        
-        api:
-            pattern: ^/api/
-            stateless: true
-            provider: app_user_provider
-            jwt: ~
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
-            # ...
+            stateless: true
+            provider: app_user_provider
+            entry_point: jwt
             json_login:
                 check_path: /authentication_token
                 username_path: email
                 password_path: password
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
+            jwt: ~
+            refresh_jwt:
+                check_path: /api/token/refresh
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -39,11 +38,8 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
    
+       - { path: ^/authentication_token, roles: IS_AUTHENTICATED_ANONYMOUSLY }
        
-        - { path: ^/api/, roles: IS_AUTHENTICATED_FULLY }
-        - { path: ^/authentication_token, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/, roles: IS_AUTHENTICATED_FULLY }
-
 when@test:
     security:
         password_hashers:
