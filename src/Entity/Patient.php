@@ -25,7 +25,7 @@ class Patient
     private ?string $sexe = null;
 
     #[ORM\Column]
-    private ?int $age = null;
+    private ?string $age = null;
 
     #[ORM\Column (options: ['default' => 'CURRENT_TIMESTAMP'])]
     private ?\DateTimeImmutable $created_at = null;
@@ -81,12 +81,12 @@ class Patient
         return $this;
     }
 
-    public function getAge(): ?int
+    public function getAge(): ?string
     {
         return $this->age;
     }
 
-    public function setAge(int $age): self
+    public function setAge(string $age): self
     {
         $this->age = $age;
 

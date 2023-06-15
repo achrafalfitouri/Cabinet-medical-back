@@ -3,5 +3,6 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
-api_login_check:
+authentication_token:
     path: /authentication_token
+    methods: ['POST']
