@@ -27,7 +27,7 @@ security:
             jwt: ~
             refresh_jwt:
                 check_path: /api/token/refresh
-
+         
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
 
