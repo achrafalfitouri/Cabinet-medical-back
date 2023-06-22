@@ -24,8 +24,7 @@ class Ordonance
     #[ORM\Column(length: 255)]
     private ?string $maladie = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $nom_medicament = null;
+   
 
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
@@ -43,6 +42,9 @@ class Ordonance
     #[ORM\ManyToOne(inversedBy: 'ordonances')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
+
+    #[ORM\Column(type: Types::SIMPLE_ARRAY)]
+    private array $nom_medicament = [];
 
     public function __construct()
     {
@@ -78,17 +80,7 @@ class Ordonance
         return $this;
     }
 
-    public function getNomMedicament(): ?string
-    {
-        return $this->nom_medicament;
-    }
 
-    public function setNomMedicament(string $nom_medicament): self
-    {
-        $this->nom_medicament = $nom_medicament;
-
-        return $this;
-    }
 
     public function getDescription(): ?string
     {
@@ -158,6 +150,18 @@ class Ordonance
     public function setUser(?User $user): self
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getNomMedicament(): array
+    {
+        return $this->nom_medicament;
+    }
+
+    public function setNomMedicament(array $nom_medicament): self
+    {
+        $this->nom_medicament = $nom_medicament;
 
         return $this;
     }
