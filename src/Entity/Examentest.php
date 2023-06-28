@@ -8,9 +8,14 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
+
+
+
 #[ORM\Entity(repositoryClass: ExamentestRepository::class)]
 #[ApiResource]
 #[ApiFilter(SearchFilter::class, strategy: 'word_start')]
+#[ApiFilter(OrderFilter::class, properties: ['created_at' => 'DESC'])]
 
 class Examentest
 {

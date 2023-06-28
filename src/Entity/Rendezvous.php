@@ -9,12 +9,14 @@ use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Metadata\ApiFilter;
 use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
+use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 
 
 #[ORM\Entity(repositoryClass: RendezvousRepository::class)]
 #[ApiResource]
 #[ApiFilter(SearchFilter::class, strategy: 'word_start')]
 #[ApiFilter(DateFilter::class, strategy: 'null')]
+#[ApiFilter(OrderFilter::class, properties: ['created_at' => 'DESC'])]
 
 
 class Rendezvous
