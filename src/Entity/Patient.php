@@ -1,13 +1,18 @@
 <?php
 
 namespace App\Entity;
-
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\PatientRepository;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 
 #[ORM\Entity(repositoryClass: PatientRepository::class)]
 #[ApiResource]
+#[ApiFilter(SearchFilter::class, strategy: 'word_start')]
+#[ApiFilter(OrderFilter::class, properties: ['created_at' => 'DESC'])]
+
 class Patient
 {
     #[ORM\Id]

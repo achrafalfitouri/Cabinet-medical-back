@@ -6,9 +6,17 @@ use ApiPlatform\Metadata\ApiResource;
 use App\Repository\RendezvousRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
+
 
 #[ORM\Entity(repositoryClass: RendezvousRepository::class)]
 #[ApiResource]
+#[ApiFilter(SearchFilter::class, strategy: 'word_start')]
+#[ApiFilter(DateFilter::class, strategy: 'null')]
+
+
 class Rendezvous
 {
     #[ORM\Id]

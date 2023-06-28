@@ -5,9 +5,12 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\CategoriemRepository;
 use Doctrine\ORM\Mapping as ORM;
-
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 #[ORM\Entity(repositoryClass: CategoriemRepository::class)]
 #[ApiResource]
+#[ApiFilter(SearchFilter::class, strategy: 'word_start')]
+
 class Categoriem
 {
     #[ORM\Id]
