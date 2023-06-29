@@ -16,7 +16,22 @@ use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 
 #[ORM\Entity(repositoryClass: OrdonanceRepository::class)]
 #[ApiResource]
-#[ApiFilter(SearchFilter::class, strategy: 'word_start')]
+
+
+#[ApiFilter(SearchFilter::class, properties:[
+
+'id' => SearchFilter::STRATEGY_WORD_START,
+'patient.id' => SearchFilter::STRATEGY_EXACT,   
+'nom_patient' => SearchFilter::STRATEGY_WORD_START,
+'maladie' => SearchFilter::STRATEGY_WORD_START,
+'description' => SearchFilter::STRATEGY_WORD_START,
+'created_at' => SearchFilter::STRATEGY_WORD_START,
+'medicament' => SearchFilter::STRATEGY_WORD_START,
+'user' => SearchFilter::STRATEGY_WORD_START,
+'nom_medicament' => SearchFilter::STRATEGY_WORD_START,
+'patient' => SearchFilter::STRATEGY_WORD_START,
+])]
+
 #[ApiFilter(OrderFilter::class, properties: ['created_at' => 'DESC'])]
 
 class Ordonance

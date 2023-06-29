@@ -45,6 +45,9 @@ class Patient
     #[ORM\Column(length: 255)]
     private ?string $tel = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $cin = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -142,6 +145,18 @@ class Patient
     public function setTel(string $tel): self
     {
         $this->tel = $tel;
+
+        return $this;
+    }
+
+    public function getCin(): ?string
+    {
+        return $this->cin;
+    }
+
+    public function setCin(string $cin): self
+    {
+        $this->cin = $cin;
 
         return $this;
     }
