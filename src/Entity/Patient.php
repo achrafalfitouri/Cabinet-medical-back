@@ -1,13 +1,18 @@
 <?php
 
 namespace App\Entity;
-
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\PatientRepository;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 
 #[ORM\Entity(repositoryClass: PatientRepository::class)]
 #[ApiResource]
+#[ApiFilter(SearchFilter::class, strategy: 'word_start')]
+#[ApiFilter(OrderFilter::class, properties: ['created_at' => 'DESC'])]
+
 class Patient
 {
     #[ORM\Id]
@@ -39,6 +44,9 @@ class Patient
 
     #[ORM\Column(length: 255)]
     private ?string $tel = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $cin = null;
 
     public function getId(): ?int
     {
@@ -137,6 +145,18 @@ class Patient
     public function setTel(string $tel): self
     {
         $this->tel = $tel;
+
+        return $this;
+    }
+
+    public function getCin(): ?string
+    {
+        return $this->cin;
+    }
+
+    public function setCin(string $cin): self
+    {
+        $this->cin = $cin;
 
         return $this;
     }

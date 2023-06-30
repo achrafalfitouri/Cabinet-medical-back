@@ -6,9 +6,27 @@ use ApiPlatform\Metadata\ApiResource;
 use App\Repository\ExamenresultatRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 
 #[ORM\Entity(repositoryClass: ExamenresultatRepository::class)]
 #[ApiResource]
+#[ApiFilter(SearchFilter::class, properties:[
+
+    'id' => SearchFilter::STRATEGY_WORD_START,
+    'patient.id' => SearchFilter::STRATEGY_EXACT,   
+    'nom_patient' => SearchFilter::STRATEGY_WORD_START,
+    'maladie' => SearchFilter::STRATEGY_WORD_START,
+    'description' => SearchFilter::STRATEGY_WORD_START,
+    'created_at' => SearchFilter::STRATEGY_WORD_START,
+    'nom_test' => SearchFilter::STRATEGY_WORD_START,
+    'user' => SearchFilter::STRATEGY_WORD_START,
+    'patient' => SearchFilter::STRATEGY_WORD_START,
+    'examentest' => SearchFilter::STRATEGY_WORD_START,
+    ])]
+#[ApiFilter(OrderFilter::class, properties: ['created_at' => 'DESC'])]
+
 class Examenresultat
 {
     #[ORM\Id]
@@ -38,6 +56,10 @@ class Examenresultat
     #[ORM\ManyToOne(inversedBy: 'examenresultats')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Patient $patient = null;
 
     public function getId(): ?int
     {
@@ -124,6 +146,18 @@ class Examenresultat
     public function setUser(?User $user): self
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getPatient(): ?Patient
+    {
+        return $this->patient;
+    }
+
+    public function setPatient(?Patient $patient): self
+    {
+        $this->patient = $patient;
 
         return $this;
     }

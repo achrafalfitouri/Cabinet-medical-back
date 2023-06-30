@@ -8,9 +8,32 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Metadata\ApiFilter;
+use ApiPlatform\Doctrine\Orm\Filter\SearchFilter;
+use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
+
+
 
 #[ORM\Entity(repositoryClass: OrdonanceRepository::class)]
 #[ApiResource]
+
+
+#[ApiFilter(SearchFilter::class, properties:[
+
+'id' => SearchFilter::STRATEGY_WORD_START,
+'patient.id' => SearchFilter::STRATEGY_EXACT,   
+'nom_patient' => SearchFilter::STRATEGY_WORD_START,
+'maladie' => SearchFilter::STRATEGY_WORD_START,
+'description' => SearchFilter::STRATEGY_WORD_START,
+'created_at' => SearchFilter::STRATEGY_WORD_START,
+'medicament' => SearchFilter::STRATEGY_WORD_START,
+'user' => SearchFilter::STRATEGY_WORD_START,
+'nom_medicament' => SearchFilter::STRATEGY_WORD_START,
+'patient' => SearchFilter::STRATEGY_WORD_START,
+])]
+
+#[ApiFilter(OrderFilter::class, properties: ['created_at' => 'DESC'])]
+
 class Ordonance
 {
     #[ORM\Id]
@@ -24,8 +47,7 @@ class Ordonance
     #[ORM\Column(length: 255)]
     private ?string $maladie = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $nom_medicament = null;
+   
 
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
@@ -43,6 +65,9 @@ class Ordonance
     #[ORM\ManyToOne(inversedBy: 'ordonances')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
+
+    #[ORM\Column(type: Types::SIMPLE_ARRAY)]
+    private array $nom_medicament = [];
 
     public function __construct()
     {
@@ -78,17 +103,7 @@ class Ordonance
         return $this;
     }
 
-    public function getNomMedicament(): ?string
-    {
-        return $this->nom_medicament;
-    }
 
-    public function setNomMedicament(string $nom_medicament): self
-    {
-        $this->nom_medicament = $nom_medicament;
-
-        return $this;
-    }
 
     public function getDescription(): ?string
     {
@@ -158,6 +173,18 @@ class Ordonance
     public function setUser(?User $user): self
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getNomMedicament(): array
+    {
+        return $this->nom_medicament;
+    }
+
+    public function setNomMedicament(array $nom_medicament): self
+    {
+        $this->nom_medicament = $nom_medicament;
 
         return $this;
     }
