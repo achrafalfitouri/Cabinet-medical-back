@@ -9,3 +9,4 @@ lexik_jwt_authentication:
         username_path: email
         password_path: password
         
+        
