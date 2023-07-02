@@ -42,6 +42,7 @@ public function getCurrentUser()
         'nom' => $user->getNom(),
         'roles' => $user->getRoles(),
         'adresse' => $user->getAdresse(),
+        'specialite' => $user->getSpecialite(),
     ];
 
     return $this->json($dataUser);
