@@ -55,7 +55,10 @@ private ?string $password = null;
 
     #[ORM\Column(length: 255)]
     private ?string $adresse = null;
-
+    
+    #[ORM\Column(type: Types::SIMPLE_ARRAY)]
+    private array $specialite = [];
+  
     #[ORM\Column(length: 255)]
     private ?string $tel = null;
 
@@ -85,6 +88,8 @@ private ?string $password = null;
 
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Vital::class)]
     private Collection $vitals;
+
+    
     
     
     public function __construct()
@@ -457,6 +462,18 @@ private ?string $password = null;
                 $vital->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getSpecialite(): array
+    {
+        return $this->specialite;
+    }
+
+    public function setSpecialite(array $specialite): self
+    {
+        $this->specialite = $specialite;
 
         return $this;
     }
