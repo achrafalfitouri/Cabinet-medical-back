@@ -1,0 +1,45 @@
+<?php //App_Entity_Testcrud
+
+return [PHP_INT_MAX, static function () { return \Symfony\Component\VarExporter\Internal\Hydrator::hydrate(
+    $o = [
+        clone (($p = &\Symfony\Component\VarExporter\Internal\Registry::$prototypes)['Symfony\\Component\\Serializer\\Mapping\\ClassMetadata'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('Symfony\\Component\\Serializer\\Mapping\\ClassMetadata')),
+        clone ($p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata')),
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+    ],
+    null,
+    [
+        'stdClass' => [
+            'name' => [
+                'App\\Entity\\Testcrud',
+                'id',
+                'nom',
+                'sexe',
+                'age',
+                'adresse',
+                'email',
+                'tel',
+            ],
+            'attributesMetadata' => [
+                [
+                    'id' => $o[1],
+                    'nom' => $o[2],
+                    'sexe' => $o[3],
+                    'age' => $o[4],
+                    'adresse' => $o[5],
+                    'email' => $o[6],
+                    'tel' => $o[7],
+                ],
+            ],
+            'classDiscriminatorMapping' => [
+                null,
+            ],
+        ],
+    ],
+    $o[0],
+    []
+); }];

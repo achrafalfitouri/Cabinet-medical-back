@@ -1,0 +1,60 @@
+<?php //App_Entity_Examentest
+
+return [PHP_INT_MAX, static function () { return \Symfony\Component\VarExporter\Internal\Hydrator::hydrate(
+    $o = [
+        clone (($p = &\Symfony\Component\VarExporter\Internal\Registry::$prototypes)['Symfony\\Component\\Serializer\\Mapping\\ClassMetadata'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('Symfony\\Component\\Serializer\\Mapping\\ClassMetadata')),
+        clone ($p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'] ?? \Symfony\Component\VarExporter\Internal\Registry::p('Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata')),
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+        clone $p['Symfony\\Component\\Serializer\\Mapping\\AttributeMetadata'],
+    ],
+    null,
+    [
+        'stdClass' => [
+            'name' => [
+                'App\\Entity\\Examentest',
+                'id',
+                'nom_test',
+                'maladie',
+                'nom_patient',
+                'date_test',
+                'created_at',
+                'user',
+                'patient',
+                'nomTest',
+                'nomPatient',
+                'dateTest',
+                'createdAt',
+            ],
+            'attributesMetadata' => [
+                [
+                    'id' => $o[1],
+                    'nom_test' => $o[2],
+                    'maladie' => $o[3],
+                    'nom_patient' => $o[4],
+                    'date_test' => $o[5],
+                    'created_at' => $o[6],
+                    'user' => $o[7],
+                    'patient' => $o[8],
+                    'nomTest' => $o[9],
+                    'nomPatient' => $o[10],
+                    'dateTest' => $o[11],
+                    'createdAt' => $o[12],
+                ],
+            ],
+            'classDiscriminatorMapping' => [
+                null,
+            ],
+        ],
+    ],
+    $o[0],
+    []
+); }];
