@@ -31,6 +31,7 @@ class User extends \App\Entity\User implements \Doctrine\Persistence\Proxy
         "\0".parent::class."\0".'patients' => [parent::class, 'patients', null],
         "\0".parent::class."\0".'rendezvouses' => [parent::class, 'rendezvouses', null],
         "\0".parent::class."\0".'roles' => [parent::class, 'roles', null],
+        "\0".parent::class."\0".'specialite' => [parent::class, 'specialite', null],
         "\0".parent::class."\0".'tel' => [parent::class, 'tel', null],
         "\0".parent::class."\0".'vitals' => [parent::class, 'vitals', null],
         'adresse' => [parent::class, 'adresse', null],
@@ -47,6 +48,7 @@ class User extends \App\Entity\User implements \Doctrine\Persistence\Proxy
         'patients' => [parent::class, 'patients', null],
         'rendezvouses' => [parent::class, 'rendezvouses', null],
         'roles' => [parent::class, 'roles', null],
+        'specialite' => [parent::class, 'specialite', null],
         'tel' => [parent::class, 'tel', null],
         'vitals' => [parent::class, 'vitals', null],
     ];

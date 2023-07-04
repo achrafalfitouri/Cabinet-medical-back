@@ -15,6 +15,7 @@ return [PHP_INT_MAX, static function () { return \Symfony\Component\VarExporter\
                     'password',
                     'nom',
                     'adresse',
+                    'specialite',
                     'tel',
                     'created_at',
                     'rendezvouses',
