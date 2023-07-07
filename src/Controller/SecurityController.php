@@ -28,10 +28,7 @@ class SecurityController extends AbstractController
         // Retrieve the refresh token from the request
         $refreshToken = $request->cookies->get('refresh_token');
 
-        // Remove the refresh token from the database
-        // Replace the code below with the logic to delete the refresh token
-        // from your database or any other token management system
-        // Example: $refreshTokenManager->revokeRefreshToken($refreshToken);
+ 
         $query = 'TRUNCATE TABLE refresh_tokens';
         $statement = $this->connection->prepare($query);
         $statement->executeQuery();
