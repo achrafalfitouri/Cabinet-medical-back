@@ -9,7 +9,7 @@ return [PHP_INT_MAX, static function () { return \Symfony\Component\VarExporter\
     [
         'ApiPlatform\\Metadata\\ApiProperty' => [
             'description' => [
-                'A visual identifier that represents this user.',
+                null,
             ],
             'readable' => [
                 true,
