@@ -355,6 +355,6 @@ class __TwigTemplate_28028c60d3779a004b023610c417eea9 extends Template
 {% endblock body_javascript %}
 </body>
 </html>
-", "@ApiPlatform/GraphQlPlayground/index.html.twig", "C:\\Users\\Lenovo\\Documents\\GitHub\\Cabinet-medical-back\\vendor\\api-platform\\core\\src\\Symfony\\Bundle\\Resources\\views\\GraphQlPlayground\\index.html.twig");
+", "@ApiPlatform/GraphQlPlayground/index.html.twig", "C:\\Users\\ach\\Desktop\\Cabinet-medical-back\\vendor\\api-platform\\core\\src\\Symfony\\Bundle\\Resources\\views\\GraphQlPlayground\\index.html.twig");
     }
 }

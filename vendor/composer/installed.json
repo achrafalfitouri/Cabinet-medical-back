@@ -496,7 +496,7 @@
             },
             "time": "2023-04-20T13:08:54+00:00",
             "type": "library",
-            "installation-source": "dist",
+            "installation-source": "source",
             "autoload": {
                 "psr-4": {
                     "Doctrine\\Common\\DataFixtures\\": "src"
@@ -857,7 +857,7 @@
             },
             "time": "2023-05-02T15:12:16+00:00",
             "type": "symfony-bundle",
-            "installation-source": "dist",
+            "installation-source": "source",
             "autoload": {
                 "psr-4": {
                     "Doctrine\\Bundle\\FixturesBundle\\": ""

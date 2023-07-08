@@ -8,10 +8,7 @@
 return [
     false, // $matchHost
     [ // $staticRoutes
-        '/api/token/refresh' => [
-            [['_route' => 'gesdinet_jwt_refresh_token'], null, null, null, false, false, null],
-            [['_route' => 'api_refresh_token'], null, null, null, false, false, null],
-        ],
+        '/api/token/refresh' => [[['_route' => 'gesdinet_jwt_refresh_token'], null, null, null, false, false, null]],
         '/logout' => [[['_route' => 'app_security_logout', '_controller' => 'App\\Controller\\SecurityController::logout'], null, ['POST' => 0], null, false, false, null]],
         '/api/user/me' => [[['_route' => 'app_user_getcurrentuser', '_controller' => 'App\\Controller\\UserController::getCurrentUser'], null, ['GET' => 0], null, false, false, null]],
         '/authentication_token' => [[['_route' => 'authentication_token'], null, ['POST' => 0], null, false, false, null]],
@@ -91,36 +88,27 @@ return [
                                 .'|(*:945)'
                             .')'
                         .')'
-                        .'|testcruds(?'
-                            .'|/([^/\\.]++)(?:\\.([^/]++))?(*:993)'
-                            .'|(?:\\.([^/]++))?(?'
-                                .'|(*:1019)'
-                            .')'
-                            .'|/([^/\\.]++)(?:\\.([^/]++))?(?'
-                                .'|(*:1058)'
-                            .')'
-                        .')'
                         .'|users(?'
-                            .'|/([^/\\.]++)(?:\\.([^/]++))?(*:1103)'
+                            .'|/([^/\\.]++)(?:\\.([^/]++))?(*:989)'
                             .'|(?:\\.([^/]++))?(?'
-                                .'|(*:1130)'
+                                .'|(*:1015)'
                             .')'
                             .'|/([^/\\.]++)(?:\\.([^/]++))?(?'
-                                .'|(*:1169)'
+                                .'|(*:1054)'
                             .')'
                         .')'
                         .'|vitals(?'
-                            .'|/([^/\\.]++)(?:\\.([^/]++))?(*:1215)'
+                            .'|/([^/\\.]++)(?:\\.([^/]++))?(*:1100)'
                             .'|(?:\\.([^/]++))?(?'
-                                .'|(*:1242)'
+                                .'|(*:1127)'
                             .')'
                             .'|/([^/\\.]++)(?:\\.([^/]++))?(?'
-                                .'|(*:1281)'
+                                .'|(*:1166)'
                             .')'
                         .')'
                     .')'
                 .')'
-                .'|/_error/(\\d+)(?:\\.([^/]++))?(*:1322)'
+                .'|/_error/(\\d+)(?:\\.([^/]++))?(*:1207)'
             .')/?$}sDu',
     ],
     [ // $dynamicRoutes
@@ -198,37 +186,27 @@ return [
             [['_route' => '_api_/rendezvouses/{id}{._format}_patch', '_controller' => 'api_platform.action.placeholder', '_format' => null, '_stateless' => null, '_api_resource_class' => 'App\\Entity\\Rendezvous', '_api_operation_name' => '_api_/rendezvouses/{id}{._format}_patch'], ['id', '_format'], ['PATCH' => 0], null, false, true, null],
             [['_route' => '_api_/rendezvouses/{id}{._format}_delete', '_controller' => 'api_platform.action.placeholder', '_format' => null, '_stateless' => null, '_api_resource_class' => 'App\\Entity\\Rendezvous', '_api_operation_name' => '_api_/rendezvouses/{id}{._format}_delete'], ['id', '_format'], ['DELETE' => 0], null, false, true, null],
         ],
-        993 => [[['_route' => '_api_/testcruds/{id}{._format}_get', '_controller' => 'api_platform.action.placeholder', '_format' => null, '_stateless' => null, '_api_resource_class' => 'App\\Entity\\Testcrud', '_api_operation_name' => '_api_/testcruds/{id}{._format}_get'], ['id', '_format'], ['GET' => 0], null, false, true, null]],
-        1019 => [
-            [['_route' => '_api_/testcruds{._format}_get_collection', '_controller' => 'api_platform.action.placeholder', '_format' => null, '_stateless' => null, '_api_resource_class' => 'App\\Entity\\Testcrud', '_api_operation_name' => '_api_/testcruds{._format}_get_collection'], ['_format'], ['GET' => 0], null, false, true, null],
-            [['_route' => '_api_/testcruds{._format}_post', '_controller' => 'api_platform.action.placeholder', '_format' => null, '_stateless' => null, '_api_resource_class' => 'App\\Entity\\Testcrud', '_api_operation_name' => '_api_/testcruds{._format}_post'], ['_format'], ['POST' => 0], null, false, true, null],
-        ],
-        1058 => [
-            [['_route' => '_api_/testcruds/{id}{._format}_put', '_controller' => 'api_platform.action.placeholder', '_format' => null, '_stateless' => null, '_api_resource_class' => 'App\\Entity\\Testcrud', '_api_operation_name' => '_api_/testcruds/{id}{._format}_put'], ['id', '_format'], ['PUT' => 0], null, false, true, null],
-            [['_route' => '_api_/testcruds/{id}{._format}_patch', '_controller' => 'api_platform.action.placeholder', '_format' => null, '_stateless' => null, '_api_resource_class' => 'App\\Entity\\Testcrud', '_api_operation_name' => '_api_/testcruds/{id}{._format}_patch'], ['id', '_format'], ['PATCH' => 0], null, false, true, null],
-            [['_route' => '_api_/testcruds/{id}{._format}_delete', '_controller' => 'api_platform.action.placeholder', '_format' => null, '_stateless' => null, '_api_resource_class' => 'App\\Entity\\Testcrud', '_api_operation_name' => '_api_/testcruds/{id}{._format}_delete'], ['id', '_format'], ['DELETE' => 0], null, false, true, null],
-        ],
-        1103 => [[['_route' => '_api_/users/{id}{._format}_get', '_controller' => 'api_platform.action.placeholder', '_format' => null, '_stateless' => null, '_api_resource_class' => 'App\\Entity\\User', '_api_operation_name' => '_api_/users/{id}{._format}_get'], ['id', '_format'], ['GET' => 0], null, false, true, null]],
-        1130 => [
+        989 => [[['_route' => '_api_/users/{id}{._format}_get', '_controller' => 'api_platform.action.placeholder', '_format' => null, '_stateless' => null, '_api_resource_class' => 'App\\Entity\\User', '_api_operation_name' => '_api_/users/{id}{._format}_get'], ['id', '_format'], ['GET' => 0], null, false, true, null]],
+        1015 => [
             [['_route' => '_api_/users{._format}_get_collection', '_controller' => 'api_platform.action.placeholder', '_format' => null, '_stateless' => null, '_api_resource_class' => 'App\\Entity\\User', '_api_operation_name' => '_api_/users{._format}_get_collection'], ['_format'], ['GET' => 0], null, false, true, null],
             [['_route' => '_api_/users{._format}_post', '_controller' => 'api_platform.action.placeholder', '_format' => null, '_stateless' => null, '_api_resource_class' => 'App\\Entity\\User', '_api_operation_name' => '_api_/users{._format}_post'], ['_format'], ['POST' => 0], null, false, true, null],
         ],
-        1169 => [
+        1054 => [
             [['_route' => '_api_/users/{id}{._format}_put', '_controller' => 'api_platform.action.placeholder', '_format' => null, '_stateless' => null, '_api_resource_class' => 'App\\Entity\\User', '_api_operation_name' => '_api_/users/{id}{._format}_put'], ['id', '_format'], ['PUT' => 0], null, false, true, null],
             [['_route' => '_api_/users/{id}{._format}_patch', '_controller' => 'api_platform.action.placeholder', '_format' => null, '_stateless' => null, '_api_resource_class' => 'App\\Entity\\User', '_api_operation_name' => '_api_/users/{id}{._format}_patch'], ['id', '_format'], ['PATCH' => 0], null, false, true, null],
             [['_route' => '_api_/users/{id}{._format}_delete', '_controller' => 'api_platform.action.placeholder', '_format' => null, '_stateless' => null, '_api_resource_class' => 'App\\Entity\\User', '_api_operation_name' => '_api_/users/{id}{._format}_delete'], ['id', '_format'], ['DELETE' => 0], null, false, true, null],
         ],
-        1215 => [[['_route' => '_api_/vitals/{id}{._format}_get', '_controller' => 'api_platform.action.placeholder', '_format' => null, '_stateless' => null, '_api_resource_class' => 'App\\Entity\\Vital', '_api_operation_name' => '_api_/vitals/{id}{._format}_get'], ['id', '_format'], ['GET' => 0], null, false, true, null]],
-        1242 => [
+        1100 => [[['_route' => '_api_/vitals/{id}{._format}_get', '_controller' => 'api_platform.action.placeholder', '_format' => null, '_stateless' => null, '_api_resource_class' => 'App\\Entity\\Vital', '_api_operation_name' => '_api_/vitals/{id}{._format}_get'], ['id', '_format'], ['GET' => 0], null, false, true, null]],
+        1127 => [
             [['_route' => '_api_/vitals{._format}_get_collection', '_controller' => 'api_platform.action.placeholder', '_format' => null, '_stateless' => null, '_api_resource_class' => 'App\\Entity\\Vital', '_api_operation_name' => '_api_/vitals{._format}_get_collection'], ['_format'], ['GET' => 0], null, false, true, null],
             [['_route' => '_api_/vitals{._format}_post', '_controller' => 'api_platform.action.placeholder', '_format' => null, '_stateless' => null, '_api_resource_class' => 'App\\Entity\\Vital', '_api_operation_name' => '_api_/vitals{._format}_post'], ['_format'], ['POST' => 0], null, false, true, null],
         ],
-        1281 => [
+        1166 => [
             [['_route' => '_api_/vitals/{id}{._format}_put', '_controller' => 'api_platform.action.placeholder', '_format' => null, '_stateless' => null, '_api_resource_class' => 'App\\Entity\\Vital', '_api_operation_name' => '_api_/vitals/{id}{._format}_put'], ['id', '_format'], ['PUT' => 0], null, false, true, null],
             [['_route' => '_api_/vitals/{id}{._format}_patch', '_controller' => 'api_platform.action.placeholder', '_format' => null, '_stateless' => null, '_api_resource_class' => 'App\\Entity\\Vital', '_api_operation_name' => '_api_/vitals/{id}{._format}_patch'], ['id', '_format'], ['PATCH' => 0], null, false, true, null],
             [['_route' => '_api_/vitals/{id}{._format}_delete', '_controller' => 'api_platform.action.placeholder', '_format' => null, '_stateless' => null, '_api_resource_class' => 'App\\Entity\\Vital', '_api_operation_name' => '_api_/vitals/{id}{._format}_delete'], ['id', '_format'], ['DELETE' => 0], null, false, true, null],
         ],
-        1322 => [
+        1207 => [
             [['_route' => '_preview_error', '_controller' => 'error_controller::preview', '_format' => 'html'], ['code', '_format'], null, null, false, true, null],
             [null, null, null, null, false, false, 0],
         ],
