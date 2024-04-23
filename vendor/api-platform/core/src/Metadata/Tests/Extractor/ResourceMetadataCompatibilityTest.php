@@ -36,14 +36,13 @@ use ApiPlatform\Metadata\Tests\Extractor\Adapter\ResourceAdapterInterface;
 use ApiPlatform\Metadata\Tests\Extractor\Adapter\XmlResourceAdapter;
 use ApiPlatform\Metadata\Tests\Extractor\Adapter\YamlResourceAdapter;
 use ApiPlatform\Metadata\Tests\Fixtures\ApiResource\Comment;
-use ApiPlatform\Metadata\Tests\Fixtures\StateOptions;
 use ApiPlatform\Metadata\Util\CamelCaseToSnakeCaseNameConverter;
 use ApiPlatform\OpenApi\Model\ExternalDocumentation;
 use ApiPlatform\OpenApi\Model\Operation as OpenApiOperation;
 use ApiPlatform\OpenApi\Model\RequestBody;
-use ApiPlatform\State\OptionsInterface;
 use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\WebLink\Link;
 
 /**
  * Ensures XML and YAML mappings are fully compatible with ApiResource.
@@ -180,6 +179,12 @@ final class ResourceMetadataCompatibilityTest extends TestCase
                         'foo' => [
                             'type' => 'custom',
                             'bar' => 'baz',
+                        ],
+                    ],
+                    'extraArgs' => [
+                        'bar' => [
+                            'type' => 'custom',
+                            'baz' => 'qux',
                         ],
                     ],
                     'shortName' => self::SHORT_NAME,
@@ -410,6 +415,9 @@ final class ResourceMetadataCompatibilityTest extends TestCase
                         ],
                         'foo' => 'bar',
                     ],
+                    'links' => [
+                        ['rel' => 'http://www.w3.org/ns/json-ld#error', 'href' => 'http://www.w3.org/ns/hydra/error'],
+                    ],
                 ],
                 [
                     'uriTemplate' => '/users/{userId}/comments/{commentId}{._format}',
@@ -421,6 +429,9 @@ final class ResourceMetadataCompatibilityTest extends TestCase
                             'compositeIdentifier' => true,
                         ],
                         'commentId' => [Comment::class, 'id'],
+                    ],
+                    'links' => [
+                        ['rel' => 'http://www.w3.org/ns/json-ld#error', 'href' => 'http://www.w3.org/ns/hydra/error'],
                     ],
                 ],
             ],
@@ -492,6 +503,7 @@ final class ResourceMetadataCompatibilityTest extends TestCase
         'openapi',
         'paginationViaCursor',
         'stateOptions',
+        'links',
     ];
 
     /**
@@ -512,10 +524,15 @@ final class ResourceMetadataCompatibilityTest extends TestCase
             throw new AssertionFailedError('Failed asserting that the schema is valid according to '.ApiResource::class, 0, $exception);
         }
 
+        $a = new ResourceMetadataCollection(self::RESOURCE_CLASS, $this->buildApiResources());
+        $b = $collection;
+
+        $this->assertEquals($a[0], $b[0]);
+
         $this->assertEquals(new ResourceMetadataCollection(self::RESOURCE_CLASS, $this->buildApiResources()), $collection);
     }
 
-    public function getExtractors(): array
+    public static function getExtractors(): array
     {
         return [
             [XmlResourceExtractor::class, new XmlResourceAdapter()],
@@ -701,7 +718,7 @@ final class ResourceMetadataCompatibilityTest extends TestCase
         return $operations;
     }
 
-    private function withStateOptions(array $values): ?OptionsInterface
+    private function withStateOptions(array $values)
     {
         if (!$values) {
             return null;
@@ -714,9 +731,18 @@ final class ResourceMetadataCompatibilityTest extends TestCase
         $configuration = reset($values);
         switch (key($values)) {
             case 'elasticsearchOptions':
-                return new StateOptions($configuration['index'] ?? null, $configuration['type'] ?? null);
+                return null;
         }
 
         throw new \LogicException(sprintf('Unsupported "%s" state options.', key($values)));
+    }
+
+    private function withLinks(array $values): ?array
+    {
+        if (!$values) {
+            return null;
+        }
+
+        return [new Link($values[0]['rel'] ?? null, $values[0]['href'] ?? null)];
     }
 }

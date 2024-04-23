@@ -23,6 +23,8 @@ use Symfony\Component\Uid\Uuid;
 /**
  * {@inheritdoc}
  *
+ * @deprecated since 3.3 https://github.com/api-platform/core/pull/5470
+ *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
 final class TypeFactory implements TypeFactoryInterface
@@ -31,7 +33,7 @@ final class TypeFactory implements TypeFactoryInterface
 
     private ?SchemaFactoryInterface $schemaFactory = null;
 
-    public function __construct(ResourceClassResolverInterface $resourceClassResolver = null)
+    public function __construct(?ResourceClassResolverInterface $resourceClassResolver = null)
     {
         $this->resourceClassResolver = $resourceClassResolver;
     }
@@ -44,8 +46,13 @@ final class TypeFactory implements TypeFactoryInterface
     /**
      * {@inheritdoc}
      */
-    public function getType(Type $type, string $format = 'json', bool $readableLink = null, array $serializerContext = null, Schema $schema = null): array
+    public function getType(Type $type, string $format = 'json', ?bool $readableLink = null, ?array $serializerContext = null, ?Schema $schema = null): array
     {
+        if ('jsonschema' === $format) {
+            return [];
+        }
+
+        // TODO: OpenApiFactory uses this to compute filter types
         if ($type->isCollection()) {
             $keyType = $type->getCollectionKeyTypes()[0] ?? null;
             $subType = ($type->getCollectionValueTypes()[0] ?? null) ?? new Type($type->getBuiltinType(), false, $type->getClassName(), false);
@@ -66,7 +73,7 @@ final class TypeFactory implements TypeFactoryInterface
         return $this->addNullabilityToTypeDefinition($this->makeBasicType($type, $format, $readableLink, $serializerContext, $schema), $type, $schema);
     }
 
-    private function makeBasicType(Type $type, string $format = 'json', bool $readableLink = null, array $serializerContext = null, Schema $schema = null): array
+    private function makeBasicType(Type $type, string $format = 'json', ?bool $readableLink = null, ?array $serializerContext = null, ?Schema $schema = null): array
     {
         return match ($type->getBuiltinType()) {
             Type::BUILTIN_TYPE_INT => ['type' => 'integer'],
@@ -140,6 +147,7 @@ final class TypeFactory implements TypeFactoryInterface
             return [
                 'type' => 'string',
                 'format' => 'iri-reference',
+                'example' => 'https://example.com/',
             ];
         }
 

@@ -13,8 +13,9 @@ declare(strict_types=1);
 
 namespace ApiPlatform\Util;
 
-use ApiPlatform\Api\UrlGeneratorInterface;
 use ApiPlatform\Exception\InvalidArgumentException;
+use ApiPlatform\Metadata\UrlGeneratorInterface;
+use ApiPlatform\State\Util\RequestParser;
 
 /**
  * Parses and creates IRIs.
@@ -55,7 +56,7 @@ final class IriHelper
     /**
      * Gets a collection IRI for the given parameters.
      */
-    public static function createIri(array $parts, array $parameters, string $pageParameterName = null, float $page = null, $urlGenerationStrategy = UrlGeneratorInterface::ABS_PATH): string
+    public static function createIri(array $parts, array $parameters, ?string $pageParameterName = null, ?float $page = null, $urlGenerationStrategy = UrlGeneratorInterface::ABS_PATH): string
     {
         if (null !== $page && null !== $pageParameterName) {
             $parameters[$pageParameterName] = $page;

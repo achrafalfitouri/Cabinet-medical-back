@@ -14,20 +14,22 @@ declare(strict_types=1);
 namespace ApiPlatform\HttpCache\EventListener;
 
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
-use ApiPlatform\Util\OperationRequestInitiatorTrait;
-use ApiPlatform\Util\RequestAttributesExtractor;
+use ApiPlatform\State\Util\OperationRequestInitiatorTrait;
+use ApiPlatform\Symfony\Util\RequestAttributesExtractor;
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 
 /**
  * Configures cache HTTP headers for the current response.
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
+ *
+ * @deprecated use \Symfony\EventListener\AddHeadersListener.php instead
  */
 final class AddHeadersListener
 {
     use OperationRequestInitiatorTrait;
 
-    public function __construct(private readonly bool $etag = false, private readonly ?int $maxAge = null, private readonly ?int $sharedMaxAge = null, private readonly ?array $vary = null, private readonly ?bool $public = null, ResourceMetadataCollectionFactoryInterface $resourceMetadataCollectionFactory = null, private readonly ?int $staleWhileRevalidate = null, private readonly ?int $staleIfError = null)
+    public function __construct(private readonly bool $etag = false, private readonly ?int $maxAge = null, private readonly ?int $sharedMaxAge = null, private readonly ?array $vary = null, private readonly ?bool $public = null, ?ResourceMetadataCollectionFactoryInterface $resourceMetadataCollectionFactory = null, private readonly ?int $staleWhileRevalidate = null, private readonly ?int $staleIfError = null)
     {
         $this->resourceMetadataCollectionFactory = $resourceMetadataCollectionFactory;
     }
@@ -51,6 +53,9 @@ final class AddHeadersListener
         }
 
         $operation = $this->initializeOperation($request);
+        if ('api_platform.symfony.main_controller' === $operation?->getController()) {
+            return;
+        }
         $resourceCacheHeaders = $attributes['cache_headers'] ?? $operation?->getCacheHeaders() ?? [];
 
         if ($this->etag && !$response->getEtag()) {

@@ -41,7 +41,7 @@ class TypeFactoryTest extends TestCase
         $this->assertEquals($schema, $typeFactory->getType($type, 'json', null, null, new Schema(Schema::VERSION_OPENAPI)));
     }
 
-    public function typeProvider(): iterable
+    public static function typeProvider(): iterable
     {
         yield [['type' => 'integer'], new Type(Type::BUILTIN_TYPE_INT)];
         yield [['nullable' => true, 'type' => 'integer'], new Type(Type::BUILTIN_TYPE_INT, true)];
@@ -57,12 +57,12 @@ class TypeFactoryTest extends TestCase
         yield [['nullable' => true, 'type' => 'string', 'format' => 'date-time'], new Type(Type::BUILTIN_TYPE_OBJECT, true, \DateTimeImmutable::class)];
         yield [['type' => 'string', 'format' => 'duration'], new Type(Type::BUILTIN_TYPE_OBJECT, false, \DateInterval::class)];
         yield [['type' => 'string', 'format' => 'binary'], new Type(Type::BUILTIN_TYPE_OBJECT, false, \SplFileInfo::class)];
-        yield [['type' => 'string', 'format' => 'iri-reference'], new Type(Type::BUILTIN_TYPE_OBJECT, false, Dummy::class)];
-        yield [['nullable' => true, 'type' => 'string', 'format' => 'iri-reference'], new Type(Type::BUILTIN_TYPE_OBJECT, true, Dummy::class)];
+        yield [['type' => 'string', 'format' => 'iri-reference', 'example' => 'https://example.com/'], new Type(Type::BUILTIN_TYPE_OBJECT, false, Dummy::class)];
+        yield [['nullable' => true, 'type' => 'string', 'format' => 'iri-reference', 'example' => 'https://example.com/'], new Type(Type::BUILTIN_TYPE_OBJECT, true, Dummy::class)];
         yield ['enum' => ['type' => 'string', 'enum' => ['male', 'female']], new Type(Type::BUILTIN_TYPE_OBJECT, false, GenderTypeEnum::class)];
         yield ['nullable enum' => ['type' => 'string', 'enum' => ['male', 'female', null], 'nullable' => true], new Type(Type::BUILTIN_TYPE_OBJECT, true, GenderTypeEnum::class)];
-        yield ['enum resource' => ['type' => 'string', 'format' => 'iri-reference'], new Type(Type::BUILTIN_TYPE_OBJECT, false, GamePlayMode::class)];
-        yield ['nullable enum resource' => ['type' => 'string', 'format' => 'iri-reference', 'nullable' => true], new Type(Type::BUILTIN_TYPE_OBJECT, true, GamePlayMode::class)];
+        yield ['enum resource' => ['type' => 'string', 'format' => 'iri-reference', 'example' => 'https://example.com/'], new Type(Type::BUILTIN_TYPE_OBJECT, false, GamePlayMode::class)];
+        yield ['nullable enum resource' => ['type' => 'string', 'format' => 'iri-reference', 'example' => 'https://example.com/', 'nullable' => true], new Type(Type::BUILTIN_TYPE_OBJECT, true, GamePlayMode::class)];
         yield [['type' => 'array', 'items' => ['type' => 'string']], new Type(Type::BUILTIN_TYPE_STRING, false, null, true)];
         yield 'array can be itself nullable' => [
             ['nullable' => true, 'type' => 'array', 'items' => ['type' => 'string']],
@@ -169,7 +169,7 @@ class TypeFactoryTest extends TestCase
         $this->assertEquals($schema, $typeFactory->getType($type, 'json', null, null, new Schema(Schema::VERSION_JSON_SCHEMA)));
     }
 
-    public function jsonSchemaTypeProvider(): iterable
+    public static function jsonSchemaTypeProvider(): iterable
     {
         yield [['type' => 'integer'], new Type(Type::BUILTIN_TYPE_INT)];
         yield [['type' => ['integer', 'null']], new Type(Type::BUILTIN_TYPE_INT, true)];
@@ -185,12 +185,12 @@ class TypeFactoryTest extends TestCase
         yield [['type' => ['string', 'null'], 'format' => 'date-time'], new Type(Type::BUILTIN_TYPE_OBJECT, true, \DateTimeImmutable::class)];
         yield [['type' => 'string', 'format' => 'duration'], new Type(Type::BUILTIN_TYPE_OBJECT, false, \DateInterval::class)];
         yield [['type' => 'string', 'format' => 'binary'], new Type(Type::BUILTIN_TYPE_OBJECT, false, \SplFileInfo::class)];
-        yield [['type' => 'string', 'format' => 'iri-reference'], new Type(Type::BUILTIN_TYPE_OBJECT, false, Dummy::class)];
-        yield [['type' => ['string', 'null'], 'format' => 'iri-reference'], new Type(Type::BUILTIN_TYPE_OBJECT, true, Dummy::class)];
+        yield [['type' => 'string', 'format' => 'iri-reference', 'example' => 'https://example.com/'], new Type(Type::BUILTIN_TYPE_OBJECT, false, Dummy::class)];
+        yield [['type' => ['string', 'null'], 'format' => 'iri-reference', 'example' => 'https://example.com/'], new Type(Type::BUILTIN_TYPE_OBJECT, true, Dummy::class)];
         yield ['enum' => ['type' => 'string', 'enum' => ['male', 'female']], new Type(Type::BUILTIN_TYPE_OBJECT, false, GenderTypeEnum::class)];
         yield ['nullable enum' => ['type' => ['string', 'null'], 'enum' => ['male', 'female', null]], new Type(Type::BUILTIN_TYPE_OBJECT, true, GenderTypeEnum::class)];
-        yield ['enum resource' => ['type' => 'string', 'format' => 'iri-reference'], new Type(Type::BUILTIN_TYPE_OBJECT, false, GamePlayMode::class)];
-        yield ['nullable enum resource' => ['type' => ['string', 'null'], 'format' => 'iri-reference'], new Type(Type::BUILTIN_TYPE_OBJECT, true, GamePlayMode::class)];
+        yield ['enum resource' => ['type' => 'string', 'format' => 'iri-reference', 'example' => 'https://example.com/'], new Type(Type::BUILTIN_TYPE_OBJECT, false, GamePlayMode::class)];
+        yield ['nullable enum resource' => ['type' => ['string', 'null'], 'format' => 'iri-reference', 'example' => 'https://example.com/'], new Type(Type::BUILTIN_TYPE_OBJECT, true, GamePlayMode::class)];
         yield [['type' => 'array', 'items' => ['type' => 'string']], new Type(Type::BUILTIN_TYPE_STRING, false, null, true)];
         yield 'array can be itself nullable' => [
             ['type' => ['array', 'null'], 'items' => ['type' => 'string']],
@@ -290,7 +290,7 @@ class TypeFactoryTest extends TestCase
         $this->assertEquals($schema, $typeFactory->getType($type, 'json', null, null, new Schema(Schema::VERSION_SWAGGER)));
     }
 
-    public function openAPIV2TypeProvider(): iterable
+    public static function openAPIV2TypeProvider(): iterable
     {
         yield [['type' => 'integer'], new Type(Type::BUILTIN_TYPE_INT)];
         yield [['type' => 'integer'], new Type(Type::BUILTIN_TYPE_INT, true)];
@@ -306,12 +306,12 @@ class TypeFactoryTest extends TestCase
         yield [['type' => 'string', 'format' => 'date-time'], new Type(Type::BUILTIN_TYPE_OBJECT, true, \DateTimeImmutable::class)];
         yield [['type' => 'string', 'format' => 'duration'], new Type(Type::BUILTIN_TYPE_OBJECT, false, \DateInterval::class)];
         yield [['type' => 'string', 'format' => 'binary'], new Type(Type::BUILTIN_TYPE_OBJECT, false, \SplFileInfo::class)];
-        yield [['type' => 'string', 'format' => 'iri-reference'], new Type(Type::BUILTIN_TYPE_OBJECT, false, Dummy::class)];
-        yield [['type' => 'string', 'format' => 'iri-reference'], new Type(Type::BUILTIN_TYPE_OBJECT, true, Dummy::class)];
+        yield [['type' => 'string', 'format' => 'iri-reference', 'example' => 'https://example.com/'], new Type(Type::BUILTIN_TYPE_OBJECT, false, Dummy::class)];
+        yield [['type' => 'string', 'format' => 'iri-reference', 'example' => 'https://example.com/'], new Type(Type::BUILTIN_TYPE_OBJECT, true, Dummy::class)];
         yield ['enum' => ['type' => 'string', 'enum' => ['male', 'female']], new Type(Type::BUILTIN_TYPE_OBJECT, false, GenderTypeEnum::class)];
         yield ['nullable enum' => ['type' => 'string', 'enum' => ['male', 'female', null]], new Type(Type::BUILTIN_TYPE_OBJECT, true, GenderTypeEnum::class)];
-        yield ['enum resource' => ['type' => 'string', 'format' => 'iri-reference'], new Type(Type::BUILTIN_TYPE_OBJECT, false, GamePlayMode::class)];
-        yield ['nullable enum resource' => ['type' => 'string', 'format' => 'iri-reference'], new Type(Type::BUILTIN_TYPE_OBJECT, true, GamePlayMode::class)];
+        yield ['enum resource' => ['type' => 'string', 'format' => 'iri-reference', 'example' => 'https://example.com/'], new Type(Type::BUILTIN_TYPE_OBJECT, false, GamePlayMode::class)];
+        yield ['nullable enum resource' => ['type' => 'string', 'format' => 'iri-reference', 'example' => 'https://example.com/'], new Type(Type::BUILTIN_TYPE_OBJECT, true, GamePlayMode::class)];
         yield [['type' => 'array', 'items' => ['type' => 'string']], new Type(Type::BUILTIN_TYPE_STRING, false, null, true)];
         yield 'array can be itself nullable, but ignored in OpenAPI V2' => [
             ['type' => 'array', 'items' => ['type' => 'string']],
@@ -412,10 +412,10 @@ class TypeFactoryTest extends TestCase
     }
 
     /** @dataProvider classTypeWithNullabilityDataProvider */
-    public function testGetClassTypeWithNullability(array $expected, SchemaFactoryInterface $schemaFactory, Schema $schema): void
+    public function testGetClassTypeWithNullability(array $expected, callable $schemaFactoryFactory, Schema $schema): void
     {
         $typeFactory = new TypeFactory();
-        $typeFactory->setSchemaFactory($schemaFactory);
+        $typeFactory->setSchemaFactory($schemaFactoryFactory($this));
 
         self::assertEquals(
             $expected,
@@ -423,9 +423,10 @@ class TypeFactoryTest extends TestCase
         );
     }
 
-    public function classTypeWithNullabilityDataProvider(): iterable
+    public static function classTypeWithNullabilityDataProvider(): iterable
     {
-        $schemaFactory = $this->createSchemaFactoryMock($schema = new Schema());
+        $schema = new Schema();
+        $schemaFactoryFactory = fn (self $that): SchemaFactoryInterface => $that->createSchemaFactoryMock($schema);
 
         yield 'JSON-Schema version' => [
             [
@@ -434,11 +435,12 @@ class TypeFactoryTest extends TestCase
                     ['type' => 'null'],
                 ],
             ],
-            $schemaFactory,
+            $schemaFactoryFactory,
             $schema,
         ];
 
-        $schemaFactory = $this->createSchemaFactoryMock($schema = new Schema(Schema::VERSION_OPENAPI));
+        $schema = new Schema(Schema::VERSION_OPENAPI);
+        $schemaFactoryFactory = fn (self $that): SchemaFactoryInterface => $that->createSchemaFactoryMock($schema);
 
         yield 'OpenAPI < 3.1 version' => [
             [
@@ -447,7 +449,7 @@ class TypeFactoryTest extends TestCase
                 ],
                 'nullable' => true,
             ],
-            $schemaFactory,
+            $schemaFactoryFactory,
             $schema,
         ];
     }

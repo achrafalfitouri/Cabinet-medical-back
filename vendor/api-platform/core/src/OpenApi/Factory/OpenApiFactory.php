@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace ApiPlatform\OpenApi\Factory;
 
+use ApiPlatform\Doctrine\Odm\State\Options as DoctrineODMOptions;
 use ApiPlatform\Doctrine\Orm\State\Options as DoctrineOptions;
 use ApiPlatform\JsonSchema\Schema;
 use ApiPlatform\JsonSchema\SchemaFactoryInterface;
@@ -69,7 +70,7 @@ final class OpenApiFactory implements OpenApiFactoryInterface
      */
     public const OPENAPI_DEFINITION_NAME = 'openapi_definition_name';
 
-    public function __construct(private readonly ResourceNameCollectionFactoryInterface $resourceNameCollectionFactory, private readonly ResourceMetadataCollectionFactoryInterface $resourceMetadataFactory, private readonly PropertyNameCollectionFactoryInterface $propertyNameCollectionFactory, private readonly PropertyMetadataFactoryInterface $propertyMetadataFactory, private readonly SchemaFactoryInterface $jsonSchemaFactory, private readonly TypeFactoryInterface $jsonSchemaTypeFactory, ContainerInterface $filterLocator, private readonly array $formats = [], Options $openApiOptions = null, PaginationOptions $paginationOptions = null, private readonly ?RouterInterface $router = null)
+    public function __construct(private readonly ResourceNameCollectionFactoryInterface $resourceNameCollectionFactory, private readonly ResourceMetadataCollectionFactoryInterface $resourceMetadataFactory, private readonly PropertyNameCollectionFactoryInterface $propertyNameCollectionFactory, private readonly PropertyMetadataFactoryInterface $propertyMetadataFactory, private readonly SchemaFactoryInterface $jsonSchemaFactory, private readonly TypeFactoryInterface $jsonSchemaTypeFactory, ContainerInterface $filterLocator, private readonly array $formats = [], ?Options $openApiOptions = null, ?PaginationOptions $paginationOptions = null, private readonly ?RouterInterface $router = null)
     {
         $this->filterLocator = $filterLocator;
         $this->openApiOptions = $openApiOptions ?: new Options('API Platform');
@@ -155,7 +156,7 @@ final class OpenApiFactory implements OpenApiFactoryInterface
             }
 
             $path = $this->getPath($path);
-            $method = $operation->getMethod() ?? HttpOperation::METHOD_GET;
+            $method = $operation->getMethod() ?? 'GET';
 
             if (!\in_array($method, PathItem::$methods, true)) {
                 continue;
@@ -264,7 +265,7 @@ final class OpenApiFactory implements OpenApiFactoryInterface
                     continue;
                 }
 
-                $parameter = new Parameter($parameterName, 'path', (new \ReflectionClass($uriVariable->getFromClass()))->getShortName().' identifier', true, false, false, ['type' => 'string']);
+                $parameter = new Parameter($parameterName, 'path', "$resourceShortName identifier", true, false, false, ['type' => 'string']);
                 if ($this->hasParameter($openapiOperation, $parameter)) {
                     continue;
                 }
@@ -272,7 +273,7 @@ final class OpenApiFactory implements OpenApiFactoryInterface
                 $openapiOperation = $openapiOperation->withParameter($parameter);
             }
 
-            if ($operation instanceof CollectionOperationInterface && HttpOperation::METHOD_POST !== $method) {
+            if ($operation instanceof CollectionOperationInterface && 'POST' !== $method) {
                 foreach (array_merge($this->getPaginationParameters($operation), $this->getFiltersParameters($operation)) as $parameter) {
                     if ($this->hasParameter($openapiOperation, $parameter)) {
                         continue;
@@ -285,11 +286,11 @@ final class OpenApiFactory implements OpenApiFactoryInterface
             $existingResponses = $openapiOperation?->getResponses() ?: [];
             // Create responses
             switch ($method) {
-                case HttpOperation::METHOD_GET:
+                case 'GET':
                     $successStatus = (string) $operation->getStatus() ?: 200;
                     $openapiOperation = $this->buildOpenApiResponse($existingResponses, $successStatus, sprintf('%s %s', $resourceShortName, $operation instanceof CollectionOperationInterface ? 'collection' : 'resource'), $openapiOperation, $operation, $responseMimeTypes, $operationOutputSchemas);
                     break;
-                case HttpOperation::METHOD_POST:
+                case 'POST':
                     $successStatus = (string) $operation->getStatus() ?: 201;
 
                     $openapiOperation = $this->buildOpenApiResponse($existingResponses, $successStatus, sprintf('%s resource created', $resourceShortName), $openapiOperation, $operation, $responseMimeTypes, $operationOutputSchemas, $resourceMetadataCollection);
@@ -298,8 +299,8 @@ final class OpenApiFactory implements OpenApiFactoryInterface
 
                     $openapiOperation = $this->buildOpenApiResponse($existingResponses, '422', 'Unprocessable entity', $openapiOperation);
                     break;
-                case HttpOperation::METHOD_PATCH:
-                case HttpOperation::METHOD_PUT:
+                case 'PATCH':
+                case 'PUT':
                     $successStatus = (string) $operation->getStatus() ?: 200;
                     $openapiOperation = $this->buildOpenApiResponse($existingResponses, $successStatus, sprintf('%s resource updated', $resourceShortName), $openapiOperation, $operation, $responseMimeTypes, $operationOutputSchemas, $resourceMetadataCollection);
                     $openapiOperation = $this->buildOpenApiResponse($existingResponses, '400', 'Invalid input', $openapiOperation);
@@ -308,7 +309,7 @@ final class OpenApiFactory implements OpenApiFactoryInterface
                     }
                     $openapiOperation = $this->buildOpenApiResponse($existingResponses, '422', 'Unprocessable entity', $openapiOperation);
                     break;
-                case HttpOperation::METHOD_DELETE:
+                case 'DELETE':
                     $successStatus = (string) $operation->getStatus() ?: 204;
 
                     $openapiOperation = $this->buildOpenApiResponse($existingResponses, $successStatus, sprintf('%s resource deleted', $resourceShortName), $openapiOperation);
@@ -316,7 +317,7 @@ final class OpenApiFactory implements OpenApiFactoryInterface
                     break;
             }
 
-            if (!$operation instanceof CollectionOperationInterface && HttpOperation::METHOD_POST !== $operation->getMethod()) {
+            if (!$operation instanceof CollectionOperationInterface && 'POST' !== $operation->getMethod()) {
                 if (!isset($existingResponses[404])) {
                     $openapiOperation = $openapiOperation->withResponse(404, new Response('Resource not found'));
                 }
@@ -346,7 +347,10 @@ final class OpenApiFactory implements OpenApiFactoryInterface
                     'The "openapiContext" option is deprecated, use "openapi" instead.'
                 );
                 $openapiOperation = $openapiOperation->withRequestBody(new RequestBody($contextRequestBody['description'] ?? '', new \ArrayObject($contextRequestBody['content']), $contextRequestBody['required'] ?? false));
-            } elseif (null === $openapiOperation->getRequestBody() && \in_array($method, [HttpOperation::METHOD_PATCH, HttpOperation::METHOD_PUT, HttpOperation::METHOD_POST], true)) {
+            } elseif (
+                null === $openapiOperation->getRequestBody() && \in_array($method, ['PATCH', 'PUT', 'POST'], true)
+                && !(false === ($input = $operation->getInput()) || (\is_array($input) && null === $input['class']))
+            ) {
                 $operationInputSchemas = [];
                 foreach ($requestMimeTypes as $operationFormat) {
                     $operationInputSchema = $this->jsonSchemaFactory->buildSchema($resourceClass, $operationFormat, Schema::TYPE_INPUT, $operation, $schema, null, $forceSchemaCollection);
@@ -354,7 +358,7 @@ final class OpenApiFactory implements OpenApiFactoryInterface
                     $this->appendSchemaDefinitions($schemas, $operationInputSchema->getDefinitions());
                 }
 
-                $openapiOperation = $openapiOperation->withRequestBody(new RequestBody(sprintf('The %s %s resource', HttpOperation::METHOD_POST === $method ? 'new' : 'updated', $resourceShortName), $this->buildContent($requestMimeTypes, $operationInputSchemas), true));
+                $openapiOperation = $openapiOperation->withRequestBody(new RequestBody(sprintf('The %s %s resource', 'POST' === $method ? 'new' : 'updated', $resourceShortName), $this->buildContent($requestMimeTypes, $operationInputSchemas), true));
             }
 
             // TODO Remove in 4.0
@@ -370,6 +374,7 @@ final class OpenApiFactory implements OpenApiFactoryInterface
                         'externalDocs' => new ExternalDocumentation(description: $value['description'] ?? '', url: $value['url'] ?? ''),
                         'requestBody' => new RequestBody(description: $value['description'] ?? '', content: isset($value['content']) ? new \ArrayObject($value['content'] ?? []) : null, required: $value['required'] ?? false),
                         'callbacks' => new \ArrayObject($value ?? []),
+                        'parameters' => $openapiOperation->getParameters(),
                         default => $value,
                     };
 
@@ -386,7 +391,7 @@ final class OpenApiFactory implements OpenApiFactoryInterface
         }
     }
 
-    private function buildOpenApiResponse(array $existingResponses, int|string $status, string $description, Model\Operation $openapiOperation = null, HttpOperation $operation = null, array $responseMimeTypes = null, array $operationOutputSchemas = null, ResourceMetadataCollection $resourceMetadataCollection = null): Model\Operation
+    private function buildOpenApiResponse(array $existingResponses, int|string $status, string $description, ?Model\Operation $openapiOperation = null, ?HttpOperation $operation = null, ?array $responseMimeTypes = null, ?array $operationOutputSchemas = null, ?ResourceMetadataCollection $resourceMetadataCollection = null): Model\Operation
     {
         if (isset($existingResponses[$status])) {
             return $openapiOperation;
@@ -497,12 +502,12 @@ final class OpenApiFactory implements OpenApiFactoryInterface
         foreach ($resourceMetadataCollection as $resource) {
             foreach ($resource->getOperations() as $operationName => $operation) {
                 $parameters = [];
-                $method = $operation instanceof HttpOperation ? $operation->getMethod() : HttpOperation::METHOD_GET;
+                $method = $operation instanceof HttpOperation ? $operation->getMethod() : 'GET';
                 if (
                     $operationName === $operation->getName()
                     || isset($links[$operationName])
                     || $operation instanceof CollectionOperationInterface
-                    || HttpOperation::METHOD_GET !== $method
+                    || 'GET' !== $method
                 ) {
                     continue;
                 }
@@ -560,12 +565,18 @@ final class OpenApiFactory implements OpenApiFactoryInterface
 
             $filter = $this->filterLocator->get($filterId);
             $entityClass = $operation->getClass();
-            if (($options = $operation->getStateOptions()) && $options instanceof DoctrineOptions && $options->getEntityClass()) {
-                $entityClass = $options->getEntityClass();
+            if ($options = $operation->getStateOptions()) {
+                if ($options instanceof DoctrineOptions && $options->getEntityClass()) {
+                    $entityClass = $options->getEntityClass();
+                }
+
+                if ($options instanceof DoctrineODMOptions && $options->getDocumentClass()) {
+                    $entityClass = $options->getDocumentClass();
+                }
             }
 
             foreach ($filter->getDescription($entityClass) as $name => $data) {
-                $schema = $data['schema'] ?? (\in_array($data['type'], Type::$builtinTypes, true) ? $this->jsonSchemaTypeFactory->getType(new Type($data['type'], false, null, $data['is_collection'] ?? false)) : ['type' => 'string']);
+                $schema = $data['schema'] ?? (\in_array($data['type'], Type::$builtinTypes, true) ? $this->jsonSchemaTypeFactory->getType(new Type($data['type'], false, null, $data['is_collection'] ?? false), 'openapi') : ['type' => 'string']);
 
                 $parameters[] = new Parameter(
                     $name,

@@ -13,16 +13,17 @@ declare(strict_types=1);
 
 namespace ApiPlatform\Metadata\Extractor;
 
+use ApiPlatform\Elasticsearch\State\Options;
 use ApiPlatform\Metadata\Exception\InvalidArgumentException;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
-use ApiPlatform\Metadata\Tests\Fixtures\StateOptions;
 use ApiPlatform\OpenApi\Model\ExternalDocumentation;
 use ApiPlatform\OpenApi\Model\Operation as OpenApiOperation;
 use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\State\OptionsInterface;
 use Symfony\Component\Config\Util\XmlUtils;
+use Symfony\Component\WebLink\Link;
 
 /**
  * Extracts an array of metadata from a list of XML files.
@@ -94,6 +95,7 @@ final class XmlResourceExtractor extends AbstractResourceExtractor
             'exceptionToStatus' => $this->buildExceptionToStatus($resource),
             'queryParameterValidationEnabled' => $this->phpize($resource, 'queryParameterValidationEnabled', 'bool'),
             'stateOptions' => $this->buildStateOptions($resource),
+            'links' => $this->buildLinks($resource),
         ]);
     }
 
@@ -356,7 +358,7 @@ final class XmlResourceExtractor extends AbstractResourceExtractor
         return $data;
     }
 
-    private function buildExtraProperties(\SimpleXMLElement $resource, string $key = null): ?array
+    private function buildExtraProperties(\SimpleXMLElement $resource, ?string $key = null): ?array
     {
         if (null !== $key) {
             if (!isset($resource->{$key})) {
@@ -386,6 +388,8 @@ final class XmlResourceExtractor extends AbstractResourceExtractor
 
             if (\in_array((string) $operation['class'], [GetCollection::class, Post::class], true)) {
                 $datum['itemUriTemplate'] = $this->phpize($operation, 'itemUriTemplate', 'string');
+            } elseif (isset($operation['itemUriTemplate'])) {
+                throw new InvalidArgumentException(sprintf('"itemUriTemplate" option is not allowed on a %s operation.', $operation['class']));
             }
 
             $data[] = array_merge($datum, [
@@ -424,6 +428,7 @@ final class XmlResourceExtractor extends AbstractResourceExtractor
             $data[] = array_merge($datum, [
                 'resolver' => $this->phpize($operation, 'resolver', 'string'),
                 'args' => $this->buildArgs($operation),
+                'extraArgs' => $this->buildExtraArgs($operation),
                 'class' => (string) $operation['class'],
                 'read' => $this->phpize($operation, 'read', 'bool'),
                 'deserialize' => $this->phpize($operation, 'deserialize', 'bool'),
@@ -446,12 +451,32 @@ final class XmlResourceExtractor extends AbstractResourceExtractor
         }
         $elasticsearchOptions = $stateOptions->elasticsearchOptions ?? null;
         if ($elasticsearchOptions) {
-            return new StateOptions(
-                isset($elasticsearchOptions['index']) ? (string) $elasticsearchOptions['index'] : null,
-                isset($elasticsearchOptions['type']) ? (string) $elasticsearchOptions['type'] : null,
-            );
+            if (class_exists(Options::class)) {
+                return new Options(
+                    isset($elasticsearchOptions['index']) ? (string) $elasticsearchOptions['index'] : null,
+                    isset($elasticsearchOptions['type']) ? (string) $elasticsearchOptions['type'] : null,
+                );
+            }
         }
 
         return null;
+    }
+
+    /**
+     * @return Link[]
+     */
+    private function buildLinks(\SimpleXMLElement $resource): ?array
+    {
+        $links = $resource->links ?? null;
+        if (!$resource->links) {
+            return null;
+        }
+
+        $links = [];
+        foreach ($resource->links as $link) {
+            $links[] = new Link(rel: (string) $link->link->attributes()->rel, href: (string) $link->link->attributes()->href);
+        }
+
+        return $links;
     }
 }

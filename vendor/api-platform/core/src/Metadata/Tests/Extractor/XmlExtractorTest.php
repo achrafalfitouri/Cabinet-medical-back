@@ -100,6 +100,7 @@ class XmlExtractorTest extends TestCase
                     'read' => null,
                     'write' => null,
                     'stateOptions' => null,
+                    'links' => null,
                 ],
                 [
                     'uriTemplate' => '/users/{author}/comments{._format}',
@@ -271,6 +272,7 @@ class XmlExtractorTest extends TestCase
                             'provider' => null,
                             'itemUriTemplate' => null,
                             'stateOptions' => null,
+                            'links' => null,
                         ],
                         [
                             'name' => null,
@@ -356,6 +358,7 @@ class XmlExtractorTest extends TestCase
                             ],
                             'extraProperties' => [
                                 'foo' => 'bar',
+                                'boolean' => true,
                             ],
                             'read' => null,
                             'deserialize' => null,
@@ -369,6 +372,7 @@ class XmlExtractorTest extends TestCase
                             'processor' => null,
                             'provider' => null,
                             'stateOptions' => null,
+                            'links' => null,
                         ],
                     ],
                     'graphQlOperations' => null,
@@ -378,6 +382,7 @@ class XmlExtractorTest extends TestCase
                     'read' => null,
                     'write' => null,
                     'stateOptions' => null,
+                    'links' => null,
                 ],
             ],
         ], $extractor->getResources());
@@ -394,7 +399,7 @@ class XmlExtractorTest extends TestCase
         (new XmlResourceExtractor([$path]))->getResources();
     }
 
-    public function getInvalidPaths(): array
+    public static function getInvalidPaths(): array
     {
         return [
             [

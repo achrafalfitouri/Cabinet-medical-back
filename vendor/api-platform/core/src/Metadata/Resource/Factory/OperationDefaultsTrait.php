@@ -154,11 +154,15 @@ trait OperationDefaultsTrait
         return $resource->withGraphQlOperations($graphQlOperations);
     }
 
-    private function getOperationWithDefaults(ApiResource $resource, Operation $operation, bool $generated = false): array
+    private function getOperationWithDefaults(ApiResource $resource, Operation $operation, bool $generated = false, array $ignoredOptions = []): array
     {
         // Inherit from resource defaults
         foreach (get_class_methods($resource) as $methodName) {
             if (!str_starts_with($methodName, 'get')) {
+                continue;
+            }
+
+            if (\in_array(lcfirst(substr($methodName, 3)), $ignoredOptions, true)) {
                 continue;
             }
 
@@ -198,12 +202,11 @@ trait OperationDefaultsTrait
             throw new RuntimeException(sprintf('Operation should be an instance of "%s"', HttpOperation::class));
         }
 
-        if ($operation->getRouteName()) {
+        if (!$operation->getName() && $operation->getRouteName()) {
             /** @var HttpOperation $operation */
             $operation = $operation->withName($operation->getRouteName());
         }
 
-        $path = ($operation->getRoutePrefix() ?? '').($operation->getUriTemplate() ?? '');
         $operationName = $operation->getName() ?? $this->getDefaultOperationName($operation, $resource->getClass());
 
         return [

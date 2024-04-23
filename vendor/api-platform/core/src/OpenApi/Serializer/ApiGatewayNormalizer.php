@@ -14,8 +14,9 @@ declare(strict_types=1);
 namespace ApiPlatform\OpenApi\Serializer;
 
 use Symfony\Component\Serializer\Exception\UnexpectedValueException;
-use Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface;
+use Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface as BaseCacheableSupportsMethodInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Symfony\Component\Serializer\Serializer;
 
 /**
  * Removes features unsupported by Amazon API Gateway.
@@ -43,7 +44,7 @@ final class ApiGatewayNormalizer implements NormalizerInterface, CacheableSuppor
      *
      * @throws UnexpectedValueException
      */
-    public function normalize(mixed $object, string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
+    public function normalize(mixed $object, ?string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
     {
         $data = $this->documentationNormalizer->normalize($object, $format, $context);
         if (!\is_array($data)) {
@@ -115,9 +116,19 @@ final class ApiGatewayNormalizer implements NormalizerInterface, CacheableSuppor
     /**
      * {@inheritdoc}
      */
-    public function supportsNormalization(mixed $data, string $format = null, array $context = []): bool
+    public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
     {
         return $this->documentationNormalizer->supportsNormalization($data, $format);
+    }
+
+    public function getSupportedTypes($format): array
+    {
+        // @deprecated remove condition when support for symfony versions under 6.3 is dropped
+        if (!method_exists($this->documentationNormalizer, 'getSupportedTypes')) {
+            return ['*' => $this->documentationNormalizer instanceof BaseCacheableSupportsMethodInterface && $this->documentationNormalizer->hasCacheableSupportsMethod()];
+        }
+
+        return $this->documentationNormalizer->getSupportedTypes($format);
     }
 
     /**
@@ -125,7 +136,16 @@ final class ApiGatewayNormalizer implements NormalizerInterface, CacheableSuppor
      */
     public function hasCacheableSupportsMethod(): bool
     {
-        return $this->documentationNormalizer instanceof CacheableSupportsMethodInterface && $this->documentationNormalizer->hasCacheableSupportsMethod();
+        if (method_exists(Serializer::class, 'getSupportedTypes')) {
+            trigger_deprecation(
+                'api-platform/core',
+                '3.1',
+                'The "%s()" method is deprecated, use "getSupportedTypes()" instead.',
+                __METHOD__
+            );
+        }
+
+        return $this->documentationNormalizer instanceof BaseCacheableSupportsMethodInterface && $this->documentationNormalizer->hasCacheableSupportsMethod();
     }
 
     private function isLocalRef(string $ref): bool

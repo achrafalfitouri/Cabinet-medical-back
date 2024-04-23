@@ -75,7 +75,7 @@ final class UriTemplateResourceMetadataCollectionFactory implements ResourceMeta
                         $operation = $operation->withName($routeName);
                     }
 
-                    $operations->add($routeName, $operation);
+                    $operations->add($operation->getName(), $operation);
                     continue;
                 }
 
@@ -88,7 +88,7 @@ final class UriTemplateResourceMetadataCollectionFactory implements ResourceMeta
                 $operations->add($operation->getName(), $operation);
             }
 
-            $resource = $resource->withOperations($operations->sort());
+            $resource = $resource->withOperations($operations);
             $resourceMetadataCollection[$i] = $resource;
         }
 
@@ -148,7 +148,7 @@ final class UriTemplateResourceMetadataCollectionFactory implements ResourceMeta
         $operation = $this->normalizeUriVariables($operation);
 
         if (!($uriTemplate = $operation->getUriTemplate())) {
-            if ($operation instanceof HttpOperation && HttpOperation::METHOD_POST === $operation->getMethod()) {
+            if ($operation instanceof HttpOperation && 'POST' === $operation->getMethod()) {
                 return $operation->withUriVariables([]);
             }
 
@@ -201,7 +201,7 @@ final class UriTemplateResourceMetadataCollectionFactory implements ResourceMeta
             }
 
             // We generated this operation but there're some missing identifiers
-            $uriVariables = HttpOperation::METHOD_POST === $operation->getMethod() || $operation instanceof CollectionOperationInterface ? [] : $operation->getUriVariables();
+            $uriVariables = 'POST' === $operation->getMethod() || $operation instanceof CollectionOperationInterface ? [] : $operation->getUriVariables();
 
             foreach ($diff as $key) {
                 $uriVariables[$key] = $this->linkFactory->createLinkFromProperty($operation, $key);

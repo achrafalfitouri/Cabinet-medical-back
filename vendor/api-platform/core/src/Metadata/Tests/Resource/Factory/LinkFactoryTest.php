@@ -39,7 +39,7 @@ final class LinkFactoryTest extends TestCase
     /**
      * @dataProvider provideCreateLinksFromIdentifiersCases
      */
-    public function testCreateLinksFromIdentifiers(array $propertyNames, bool $compositeIdentifier, array $expectedLinks, bool $idAsIdentifier = null): void
+    public function testCreateLinksFromIdentifiers(array $propertyNames, bool $compositeIdentifier, array $expectedLinks, ?bool $idAsIdentifier = null): void
     {
         $propertyNameCollectionFactoryProphecy = $this->prophesize(PropertyNameCollectionFactoryInterface::class);
         $propertyNameCollectionFactoryProphecy->create(Argument::cetera())->willReturn(new PropertyNameCollection($propertyNames));
@@ -58,7 +58,7 @@ final class LinkFactoryTest extends TestCase
         );
     }
 
-    public function provideCreateLinksFromIdentifiersCases(): \Generator
+    public static function provideCreateLinksFromIdentifiersCases(): \Generator
     {
         yield 'no identifiers no id' => [
             ['slug'],
@@ -111,7 +111,7 @@ final class LinkFactoryTest extends TestCase
         );
     }
 
-    public function provideCreateLinksFromAttributesCases(): \Generator
+    public static function provideCreateLinksFromAttributesCases(): \Generator
     {
         yield 'no builtin types' => [
             [],

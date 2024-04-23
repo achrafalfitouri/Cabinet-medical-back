@@ -40,7 +40,7 @@ final class OrderExtension implements AggregationCollectionExtensionInterface
     /**
      * {@inheritdoc}
      */
-    public function applyToCollection(Builder $aggregationBuilder, string $resourceClass, Operation $operation = null, array &$context = []): void
+    public function applyToCollection(Builder $aggregationBuilder, string $resourceClass, ?Operation $operation = null, array &$context = []): void
     {
         // Do not apply order if already defined on $aggregationBuilder
         if ($this->hasSortStage($aggregationBuilder)) {
@@ -64,7 +64,7 @@ final class OrderExtension implements AggregationCollectionExtensionInterface
                 }
 
                 if ($this->isPropertyNested($field, $resourceClass)) {
-                    [$field] = $this->addLookupsForNestedProperty($field, $aggregationBuilder, $resourceClass);
+                    [$field] = $this->addLookupsForNestedProperty($field, $aggregationBuilder, $resourceClass, true);
                 }
                 $aggregationBuilder->sort(
                     $context['mongodb_odm_sort_fields'] = ($context['mongodb_odm_sort_fields'] ?? []) + [$field => $order]

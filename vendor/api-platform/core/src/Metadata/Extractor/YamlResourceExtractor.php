@@ -13,15 +13,16 @@ declare(strict_types=1);
 
 namespace ApiPlatform\Metadata\Extractor;
 
+use ApiPlatform\Elasticsearch\State\Options;
 use ApiPlatform\Metadata\Exception\InvalidArgumentException;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
-use ApiPlatform\Metadata\Tests\Fixtures\StateOptions;
 use ApiPlatform\OpenApi\Model\ExternalDocumentation;
 use ApiPlatform\OpenApi\Model\Operation as OpenApiOperation;
 use ApiPlatform\OpenApi\Model\Parameter;
 use ApiPlatform\OpenApi\Model\RequestBody;
 use ApiPlatform\State\OptionsInterface;
+use Symfony\Component\WebLink\Link;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 
@@ -121,6 +122,7 @@ final class YamlResourceExtractor extends AbstractResourceExtractor
             'inputFormats' => $this->buildArrayValue($resource, 'inputFormats'),
             'outputFormats' => $this->buildArrayValue($resource, 'outputFormats'),
             'stateOptions' => $this->buildStateOptions($resource),
+            'links' => $this->buildLinks($resource),
         ]);
     }
 
@@ -322,6 +324,8 @@ final class YamlResourceExtractor extends AbstractResourceExtractor
 
             if (\in_array((string) $class, [GetCollection::class, Post::class], true)) {
                 $datum['itemUriTemplate'] = $this->phpize($operation, 'itemUriTemplate', 'string');
+            } elseif (isset($operation['itemUriTemplate'])) {
+                throw new InvalidArgumentException(sprintf('"itemUriTemplate" option is not allowed on a %s operation.', $class));
             }
 
             $data[] = array_merge($datum, [
@@ -377,6 +381,7 @@ final class YamlResourceExtractor extends AbstractResourceExtractor
             $data[] = array_merge($datum, [
                 'resolver' => $this->phpize($operation, 'resolver', 'string'),
                 'args' => $operation['args'] ?? null,
+                'extraArgs' => $operation['extraArgs'] ?? null,
                 'class' => (string) $class,
                 'read' => $this->phpize($operation, 'read', 'bool'),
                 'deserialize' => $this->phpize($operation, 'deserialize', 'bool'),
@@ -405,9 +410,28 @@ final class YamlResourceExtractor extends AbstractResourceExtractor
         $configuration = reset($stateOptions);
         switch (key($stateOptions)) {
             case 'elasticsearchOptions':
-                return new StateOptions($configuration['index'] ?? null, $configuration['type'] ?? null);
+                if (class_exists(Options::class)) {
+                    return new Options($configuration['index'] ?? null, $configuration['type'] ?? null);
+                }
         }
 
         return null;
+    }
+
+    /**
+     * @return Link[]
+     */
+    private function buildLinks(array $resource): ?array
+    {
+        if (!isset($resource['links']) || !\is_array($resource['links'])) {
+            return null;
+        }
+
+        $links = [];
+        foreach ($resource['links'] as $link) {
+            $links[] = new Link(rel: $link['rel'], href: $link['href']);
+        }
+
+        return $links;
     }
 }

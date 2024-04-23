@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace ApiPlatform\Api;
 
-use ApiPlatform\Exception\RuntimeException;
+use ApiPlatform\Metadata\Exception\RuntimeException;
 use ApiPlatform\Metadata\GraphQl\Operation as GraphQlOperation;
 use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\Operation;
@@ -28,6 +28,8 @@ use Symfony\Component\PropertyAccess\PropertyAccessorInterface;
 /**
  * {@inheritdoc}
  *
+ * @deprecated use ApiPlatform\Metadata\IdentifiersExtractor instead
+ *
  * @author Antoine Bluchet <soyuka@gmail.com>
  */
 final class IdentifiersExtractor implements IdentifiersExtractorInterface
@@ -35,7 +37,7 @@ final class IdentifiersExtractor implements IdentifiersExtractorInterface
     use ResourceClassInfoTrait;
     private readonly PropertyAccessorInterface $propertyAccessor;
 
-    public function __construct(ResourceMetadataCollectionFactoryInterface $resourceMetadataFactory, ResourceClassResolverInterface $resourceClassResolver, private readonly PropertyNameCollectionFactoryInterface $propertyNameCollectionFactory, private readonly PropertyMetadataFactoryInterface $propertyMetadataFactory, PropertyAccessorInterface $propertyAccessor = null)
+    public function __construct(ResourceMetadataCollectionFactoryInterface $resourceMetadataFactory, ResourceClassResolverInterface $resourceClassResolver, private readonly PropertyNameCollectionFactoryInterface $propertyNameCollectionFactory, private readonly PropertyMetadataFactoryInterface $propertyMetadataFactory, ?PropertyAccessorInterface $propertyAccessor = null)
     {
         $this->resourceMetadataFactory = $resourceMetadataFactory;
         $this->resourceClassResolver = $resourceClassResolver;
@@ -47,7 +49,7 @@ final class IdentifiersExtractor implements IdentifiersExtractorInterface
      *
      * TODO: 3.0 identifiers should be stringable?
      */
-    public function getIdentifiersFromItem(object $item, Operation $operation = null, array $context = []): array
+    public function getIdentifiersFromItem(object $item, ?Operation $operation = null, array $context = []): array
     {
         if (!$this->isResourceClass($this->getObjectClass($item))) {
             return ['id' => $this->propertyAccessor->getValue($item, 'id')];
@@ -72,10 +74,11 @@ final class IdentifiersExtractor implements IdentifiersExtractorInterface
         }
 
         $identifiers = [];
-        foreach ($links ?? [] as $link) {
-            if (1 < (is_countable($link->getIdentifiers()) ? \count($link->getIdentifiers()) : 0)) {
+        foreach ($links ?? [] as $k => $link) {
+            $linkIdentifiers = $link->getIdentifiers() ?? [$k];
+            if (1 < \count($linkIdentifiers)) {
                 $compositeIdentifiers = [];
-                foreach ($link->getIdentifiers() as $identifier) {
+                foreach ($linkIdentifiers as $identifier) {
                     $compositeIdentifiers[$identifier] = $this->getIdentifierValue($item, $link->getFromClass() ?? $operation->getClass(), $identifier, $link->getParameterName());
                 }
 
@@ -84,7 +87,7 @@ final class IdentifiersExtractor implements IdentifiersExtractorInterface
             }
 
             $parameterName = $link->getParameterName();
-            $identifiers[$parameterName] = $this->getIdentifierValue($item, $link->getFromClass() ?? $operation->getClass(), $link->getIdentifiers()[0], $parameterName, $link->getToProperty());
+            $identifiers[$parameterName] = $this->getIdentifierValue($item, $link->getFromClass() ?? $operation->getClass(), $linkIdentifiers[0], $parameterName, $link->getToProperty());
         }
 
         return $identifiers;
@@ -93,7 +96,7 @@ final class IdentifiersExtractor implements IdentifiersExtractorInterface
     /**
      * Gets the value of the given class property.
      */
-    private function getIdentifierValue(object $item, string $class, string $property, string $parameterName, string $toProperty = null): float|bool|int|string
+    private function getIdentifierValue(object $item, string $class, string $property, string $parameterName, ?string $toProperty = null): float|bool|int|string
     {
         if ($item instanceof $class) {
             try {

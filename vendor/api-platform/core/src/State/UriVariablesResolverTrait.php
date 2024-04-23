@@ -13,19 +13,20 @@ declare(strict_types=1);
 
 namespace ApiPlatform\State;
 
-use ApiPlatform\Api\CompositeIdentifierParser;
-use ApiPlatform\Api\UriVariablesConverterInterface;
-use ApiPlatform\Exception\InvalidIdentifierException;
+use ApiPlatform\Api\UriVariablesConverterInterface as LegacyUriVariablesConverterInterface;
+use ApiPlatform\Metadata\Exception\InvalidIdentifierException;
 use ApiPlatform\Metadata\HttpOperation;
+use ApiPlatform\Metadata\UriVariablesConverterInterface;
+use ApiPlatform\Metadata\Util\CompositeIdentifierParser;
 
 trait UriVariablesResolverTrait
 {
-    private ?UriVariablesConverterInterface $uriVariablesConverter = null;
+    private LegacyUriVariablesConverterInterface|UriVariablesConverterInterface|null $uriVariablesConverter = null;
 
     /**
      * Resolves an operation's UriVariables to their identifiers values.
      */
-    private function getOperationUriVariables(HttpOperation $operation = null, array $parameters = [], string $resourceClass = null): array
+    private function getOperationUriVariables(?HttpOperation $operation = null, array $parameters = [], ?string $resourceClass = null): array
     {
         $identifiers = [];
 
@@ -52,14 +53,14 @@ trait UriVariablesResolverTrait
 
                 foreach ($currentIdentifiers as $key => $value) {
                     $identifiers[$key] = $value;
-                    $uriVariableMap[$key] = $uriVariableDefinition;
+                    $uriVariablesMap[$key] = $uriVariableDefinition;
                 }
 
                 continue;
             }
 
             $identifiers[$parameterName] = $parameters[$parameterName];
-            $uriVariableMap[$parameterName] = $uriVariableDefinition;
+            $uriVariablesMap[$parameterName] = $uriVariableDefinition;
         }
 
         if ($this->uriVariablesConverter) {

@@ -15,7 +15,7 @@ namespace ApiPlatform\Hydra\JsonSchema;
 
 use ApiPlatform\JsonLd\ContextBuilder;
 use ApiPlatform\JsonSchema\Schema;
-use ApiPlatform\JsonSchema\SchemaFactory as BaseSchemaFactory;
+use ApiPlatform\JsonSchema\SchemaFactoryAwareInterface;
 use ApiPlatform\JsonSchema\SchemaFactoryInterface;
 use ApiPlatform\Metadata\Operation;
 
@@ -24,7 +24,7 @@ use ApiPlatform\Metadata\Operation;
  *
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
-final class SchemaFactory implements SchemaFactoryInterface
+final class SchemaFactory implements SchemaFactoryInterface, SchemaFactoryAwareInterface
 {
     private const BASE_PROP = [
         'readOnly' => true,
@@ -59,13 +59,15 @@ final class SchemaFactory implements SchemaFactoryInterface
 
     public function __construct(private readonly SchemaFactoryInterface $schemaFactory)
     {
-        $this->addDistinctFormat('jsonld');
+        if ($this->schemaFactory instanceof SchemaFactoryAwareInterface) {
+            $this->schemaFactory->setSchemaFactory($this);
+        }
     }
 
     /**
      * {@inheritdoc}
      */
-    public function buildSchema(string $className, string $format = 'jsonld', string $type = Schema::TYPE_OUTPUT, Operation $operation = null, Schema $schema = null, array $serializerContext = null, bool $forceCollection = false): Schema
+    public function buildSchema(string $className, string $format = 'jsonld', string $type = Schema::TYPE_OUTPUT, ?Operation $operation = null, ?Schema $schema = null, ?array $serializerContext = null, bool $forceCollection = false): Schema
     {
         $schema = $this->schemaFactory->buildSchema($className, $format, $type, $operation, $schema, $serializerContext, $forceCollection);
         if ('jsonld' !== $format) {
@@ -91,14 +93,15 @@ final class SchemaFactory implements SchemaFactoryInterface
             $items = $schema['items'];
             unset($schema['items']);
 
-            $nullableStringDefinition = ['type' => 'string'];
-
             switch ($schema->getVersion()) {
+                // JSON Schema + OpenAPI 3.1
+                case Schema::VERSION_OPENAPI:
                 case Schema::VERSION_JSON_SCHEMA:
                     $nullableStringDefinition = ['type' => ['string', 'null']];
                     break;
-                case Schema::VERSION_OPENAPI:
-                    $nullableStringDefinition = ['type' => 'string', 'nullable' => true];
+                    // Swagger
+                default:
+                    $nullableStringDefinition = ['type' => 'string'];
                     break;
             }
 
@@ -179,10 +182,10 @@ final class SchemaFactory implements SchemaFactoryInterface
         return $schema;
     }
 
-    public function addDistinctFormat(string $format): void
+    public function setSchemaFactory(SchemaFactoryInterface $schemaFactory): void
     {
-        if ($this->schemaFactory instanceof BaseSchemaFactory) {
-            $this->schemaFactory->addDistinctFormat($format);
+        if ($this->schemaFactory instanceof SchemaFactoryAwareInterface) {
+            $this->schemaFactory->setSchemaFactory($schemaFactory);
         }
     }
 }

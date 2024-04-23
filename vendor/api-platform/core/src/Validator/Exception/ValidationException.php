@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace ApiPlatform\Validator\Exception;
 
-use ApiPlatform\Exception\RuntimeException;
+use ApiPlatform\Metadata\Exception\RuntimeException;
 
 /**
  * Thrown when a validation error occurs.
@@ -22,7 +22,7 @@ use ApiPlatform\Exception\RuntimeException;
  */
 class ValidationException extends RuntimeException
 {
-    public function __construct(string $message = '', int $code = 0, \Throwable $previous = null, protected readonly ?string $errorTitle = null)
+    public function __construct(string $message = '', int $code = 0, ?\Throwable $previous = null, protected readonly ?string $errorTitle = null)
     {
         parent::__construct($message, $code, $previous);
     }

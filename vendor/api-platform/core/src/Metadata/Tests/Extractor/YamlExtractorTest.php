@@ -100,6 +100,7 @@ class YamlExtractorTest extends TestCase
                     'read' => null,
                     'write' => null,
                     'stateOptions' => null,
+                    'links' => null,
                 ],
             ],
             Program::class => [
@@ -170,6 +171,7 @@ class YamlExtractorTest extends TestCase
                     'read' => null,
                     'write' => null,
                     'stateOptions' => null,
+                    'links' => null,
                 ],
                 [
                     'uriTemplate' => '/users/{author}/programs{._format}',
@@ -311,6 +313,7 @@ class YamlExtractorTest extends TestCase
                             'provider' => null,
                             'itemUriTemplate' => null,
                             'stateOptions' => null,
+                            'links' => null,
                         ],
                         [
                             'name' => null,
@@ -379,7 +382,10 @@ class YamlExtractorTest extends TestCase
                             'order' => null,
                             'paginationViaCursor' => null,
                             'exceptionToStatus' => null,
-                            'extraProperties' => null,
+                            'extraProperties' => [
+                                'foo' => 'bar',
+                                'boolean' => true,
+                            ],
                             'read' => null,
                             'deserialize' => null,
                             'validate' => null,
@@ -390,6 +396,7 @@ class YamlExtractorTest extends TestCase
                             'processor' => null,
                             'provider' => null,
                             'stateOptions' => null,
+                            'links' => null,
                         ],
                     ],
                     'graphQlOperations' => null,
@@ -398,6 +405,7 @@ class YamlExtractorTest extends TestCase
                     'read' => null,
                     'write' => null,
                     'stateOptions' => null,
+                    'links' => null,
                 ],
             ],
             SingleFileConfigDummy::class => [
@@ -468,6 +476,7 @@ class YamlExtractorTest extends TestCase
                     'read' => null,
                     'write' => null,
                     'stateOptions' => null,
+                    'links' => null,
                 ],
             ],
         ], $extractor->getResources());
@@ -536,7 +545,7 @@ class YamlExtractorTest extends TestCase
         (new YamlResourceExtractor([$path]))->getResources();
     }
 
-    public function getInvalidPaths(): array
+    public static function getInvalidPaths(): array
     {
         return [
             [__DIR__.'/yaml/invalid/invalid_resources.yaml', '"resources" setting is expected to be null or an array, string given in "'.__DIR__.'/yaml/invalid/invalid_resources.yaml".'],

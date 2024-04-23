@@ -15,8 +15,8 @@ namespace ApiPlatform\Serializer;
 
 use Symfony\Component\Serializer\NameConverter\AdvancedNameConverterInterface;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
-use Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Validator\ConstraintViolation;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 
@@ -33,7 +33,7 @@ abstract class AbstractConstraintViolationListNormalizer implements NormalizerIn
 
     private readonly ?array $serializePayloadFields;
 
-    public function __construct(array $serializePayloadFields = null, private readonly ?NameConverterInterface $nameConverter = null)
+    public function __construct(?array $serializePayloadFields = null, private readonly ?NameConverterInterface $nameConverter = null)
     {
         $this->serializePayloadFields = null === $serializePayloadFields ? null : array_flip($serializePayloadFields);
     }
@@ -41,13 +41,31 @@ abstract class AbstractConstraintViolationListNormalizer implements NormalizerIn
     /**
      * {@inheritdoc}
      */
-    public function supportsNormalization(mixed $data, string $format = null, array $context = []): bool
+    public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
     {
+        if (!isset($context['rfc_7807_compliant_errors']) && !($context['api_error_resource'] ?? false)) {
+            return false;
+        }
+
         return static::FORMAT === $format && $data instanceof ConstraintViolationListInterface;
+    }
+
+    public function getSupportedTypes($format): array
+    {
+        return $format === static::FORMAT ? [ConstraintViolationListInterface::class => true] : [];
     }
 
     public function hasCacheableSupportsMethod(): bool
     {
+        if (method_exists(Serializer::class, 'getSupportedTypes')) {
+            trigger_deprecation(
+                'api-platform/core',
+                '3.1',
+                'The "%s()" method is deprecated, use "getSupportedTypes()" instead.',
+                __METHOD__
+            );
+        }
+
         return true;
     }
 

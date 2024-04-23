@@ -43,6 +43,7 @@ final class XmlPropertyAdapter implements PropertyAdapterInterface
         'initializable',
         'iris',
         'genId',
+        'uriTemplate',
     ];
 
     /**
@@ -144,7 +145,7 @@ XML_WRAP
                 $child = $node->addChild('value');
                 $this->buildValues($child, $value);
             } else {
-                $child = $node->addChild('value', $value);
+                $child = $node->addChild('value', (string) $value);
             }
             if (\is_string($key)) {
                 $child->addAttribute('name', $key);

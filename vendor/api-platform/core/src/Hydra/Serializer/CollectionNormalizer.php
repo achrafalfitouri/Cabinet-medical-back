@@ -13,12 +13,14 @@ declare(strict_types=1);
 
 namespace ApiPlatform\Hydra\Serializer;
 
-use ApiPlatform\Api\IriConverterInterface;
-use ApiPlatform\Api\ResourceClassResolverInterface;
-use ApiPlatform\Api\UrlGeneratorInterface;
+use ApiPlatform\Api\IriConverterInterface as LegacyIriConverterInterface;
+use ApiPlatform\Api\ResourceClassResolverInterface as LegacyResourceClassResolverInterface;
 use ApiPlatform\JsonLd\ContextBuilderInterface;
 use ApiPlatform\JsonLd\Serializer\JsonLdContextTrait;
+use ApiPlatform\Metadata\IriConverterInterface;
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
+use ApiPlatform\Metadata\ResourceClassResolverInterface;
+use ApiPlatform\Metadata\UrlGeneratorInterface;
 use ApiPlatform\Serializer\AbstractCollectionNormalizer;
 use ApiPlatform\State\Pagination\PaginatorInterface;
 use ApiPlatform\State\Pagination\PartialPaginatorInterface;
@@ -39,11 +41,11 @@ final class CollectionNormalizer extends AbstractCollectionNormalizer
         self::IRI_ONLY => false,
     ];
 
-    public function __construct(private readonly ContextBuilderInterface $contextBuilder, ResourceClassResolverInterface $resourceClassResolver, private readonly IriConverterInterface $iriConverter, private readonly ?ResourceMetadataCollectionFactoryInterface $resourceMetadataCollectionFactory = null, array $defaultContext = [])
+    public function __construct(private readonly ContextBuilderInterface $contextBuilder, LegacyResourceClassResolverInterface|ResourceClassResolverInterface $resourceClassResolver, private readonly LegacyIriConverterInterface|IriConverterInterface $iriConverter, readonly ?ResourceMetadataCollectionFactoryInterface $resourceMetadataCollectionFactory = null, array $defaultContext = [])
     {
         $this->defaultContext = array_merge($this->defaultContext, $defaultContext);
 
-        if ($this->resourceMetadataCollectionFactory) {
+        if ($resourceMetadataCollectionFactory) {
             trigger_deprecation('api-platform/core', '3.0', sprintf('Injecting "%s" within "%s" is not needed anymore and this dependency will be removed in 4.0.', ResourceMetadataCollectionFactoryInterface::class, self::class));
         }
 
@@ -76,29 +78,11 @@ final class CollectionNormalizer extends AbstractCollectionNormalizer
     /**
      * Gets items data.
      */
-    protected function getItemsData(iterable $object, string $format = null, array $context = []): array
+    protected function getItemsData(iterable $object, ?string $format = null, array $context = []): array
     {
         $data = [];
         $data['hydra:member'] = [];
-
         $iriOnly = $context[self::IRI_ONLY] ?? $this->defaultContext[self::IRI_ONLY];
-
-        if (($operation = $context['operation'] ?? null) && method_exists($operation, 'getItemUriTemplate')) {
-            $context['item_uri_template'] = $operation->getItemUriTemplate();
-        }
-
-        // We need to keep this operation for serialization groups for later
-        if (isset($context['operation'])) {
-            $context['root_operation'] = $context['operation'];
-        }
-
-        if (isset($context['operation_name'])) {
-            $context['root_operation_name'] = $context['operation_name'];
-        }
-
-        // We need to unset the operation to ensure a proper IRI generation inside items
-        unset($context['operation']);
-        unset($context['operation_name'], $context['uri_variables']);
 
         foreach ($object as $obj) {
             if ($iriOnly) {

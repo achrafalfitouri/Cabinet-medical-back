@@ -182,7 +182,7 @@ class NotExposedOperationResourceMetadataCollectionFactoryTest extends TestCase
                     shortName: 'AttributeResource',
                     operations: [
                         '_api_AttributeResource_get_collection' => new GetCollection(controller: 'api_platform.action.placeholder', shortName: 'AttributeResource', class: AttributeResource::class),
-                        '_api_AttributeResource_get' => new NotExposed(controller: 'api_platform.action.not_exposed', shortName: 'AttributeResource', class: AttributeResource::class, output: false, read: false),
+                        '_api_AttributeResource_get' => new NotExposed(controller: 'api_platform.action.not_exposed', shortName: 'AttributeResource', class: AttributeResource::class, output: false, read: false, extraProperties: ['generated_operation' => true]),
                     ],
                     class: AttributeResource::class
                 ),
@@ -206,6 +206,9 @@ class NotExposedOperationResourceMetadataCollectionFactoryTest extends TestCase
                 ),
                 new ApiResource(
                     shortName: 'AttributeResource',
+                    types: ['https://schema.org/Book'],
+                    uriTemplate: '/custom_api_resources', // uriTemplate should not be inherited on NotExposed operation
+                    uriVariables: ['slug'], // same as it is used to generate the uriTemplate of our NotExposed operation
                     operations: [
                         '_api_AttributeResource_get_collection' => new GetCollection(controller: 'api_platform.action.placeholder', shortName: 'AttributeResource', class: AttributeResource::class),
                     ],
@@ -224,9 +227,12 @@ class NotExposedOperationResourceMetadataCollectionFactoryTest extends TestCase
                 ),
                 new ApiResource(
                     shortName: 'AttributeResource',
+                    uriTemplate: '/custom_api_resources',
+                    uriVariables: ['slug'],
+                    types: ['https://schema.org/Book'],
                     operations: [
                         '_api_AttributeResource_get_collection' => new GetCollection(controller: 'api_platform.action.placeholder', shortName: 'AttributeResource', class: AttributeResource::class),
-                        '_api_AttributeResource_get' => new NotExposed(uriTemplate: '/.well-known/genid/{id}', controller: 'api_platform.action.not_exposed', shortName: 'AttributeResource', class: AttributeResource::class, output: false, read: false),
+                        '_api_AttributeResource_get' => new NotExposed(uriTemplate: '/.well-known/genid/{id}', controller: 'api_platform.action.not_exposed', shortName: 'AttributeResource', class: AttributeResource::class, output: false, read: false, extraProperties: ['generated_operation' => true], types: ['https://schema.org/Book']),
                     ],
                     class: AttributeResource::class
                 ),

@@ -13,24 +13,29 @@ declare(strict_types=1);
 
 namespace ApiPlatform\Hydra\Serializer;
 
-use ApiPlatform\Api\ResourceClassResolverInterface;
-use ApiPlatform\Api\UrlGeneratorInterface;
+use ApiPlatform\Api\ResourceClassResolverInterface as LegacyResourceClassResolverInterface;
+use ApiPlatform\Api\UrlGeneratorInterface as LegacyUrlGeneratorInterface;
 use ApiPlatform\Documentation\Documentation;
 use ApiPlatform\JsonLd\ContextBuilderInterface;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\CollectionOperationInterface;
+use ApiPlatform\Metadata\ErrorResource;
 use ApiPlatform\Metadata\HttpOperation;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Property\Factory\PropertyMetadataFactoryInterface;
 use ApiPlatform\Metadata\Property\Factory\PropertyNameCollectionFactoryInterface;
 use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
 use ApiPlatform\Metadata\Resource\ResourceMetadataCollection;
+use ApiPlatform\Metadata\ResourceClassResolverInterface;
+use ApiPlatform\Metadata\UrlGeneratorInterface;
+use ApiPlatform\Serializer\CacheableSupportsMethodInterface;
+use ApiPlatform\Symfony\Validator\Exception\ValidationException;
 use Symfony\Component\PropertyInfo\Type;
 use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
-use Symfony\Component\Serializer\Normalizer\CacheableSupportsMethodInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Symfony\Component\Serializer\Serializer;
 
 /**
  * Creates a machine readable Hydra API documentation.
@@ -41,14 +46,14 @@ final class DocumentationNormalizer implements NormalizerInterface, CacheableSup
 {
     public const FORMAT = 'jsonld';
 
-    public function __construct(private readonly ResourceMetadataCollectionFactoryInterface $resourceMetadataFactory, private readonly PropertyNameCollectionFactoryInterface $propertyNameCollectionFactory, private readonly PropertyMetadataFactoryInterface $propertyMetadataFactory, private readonly ResourceClassResolverInterface $resourceClassResolver, private readonly UrlGeneratorInterface $urlGenerator, private readonly ?NameConverterInterface $nameConverter = null)
+    public function __construct(private readonly ResourceMetadataCollectionFactoryInterface $resourceMetadataFactory, private readonly PropertyNameCollectionFactoryInterface $propertyNameCollectionFactory, private readonly PropertyMetadataFactoryInterface $propertyMetadataFactory, private readonly ResourceClassResolverInterface|LegacyResourceClassResolverInterface $resourceClassResolver, private readonly UrlGeneratorInterface|LegacyUrlGeneratorInterface $urlGenerator, private readonly ?NameConverterInterface $nameConverter = null)
     {
     }
 
     /**
      * {@inheritdoc}
      */
-    public function normalize(mixed $object, string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
+    public function normalize(mixed $object, ?string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
     {
         $classes = [];
         $entrypointProperties = [];
@@ -57,6 +62,10 @@ final class DocumentationNormalizer implements NormalizerInterface, CacheableSup
             $resourceMetadataCollection = $this->resourceMetadataFactory->create($resourceClass);
 
             $resourceMetadata = $resourceMetadataCollection[0];
+            if ($resourceMetadata instanceof ErrorResource && ValidationException::class === $resourceMetadata->getClass()) {
+                continue;
+            }
+
             $shortName = $resourceMetadata->getShortName();
             $prefixedShortName = $resourceMetadata->getTypes()[0] ?? "#$shortName";
             $this->populateEntrypointProperties($resourceMetadata, $shortName, $prefixedShortName, $entrypointProperties, $resourceMetadataCollection);
@@ -69,7 +78,7 @@ final class DocumentationNormalizer implements NormalizerInterface, CacheableSup
     /**
      * Populates entrypoint properties.
      */
-    private function populateEntrypointProperties(ApiResource $resourceMetadata, string $shortName, string $prefixedShortName, array &$entrypointProperties, ResourceMetadataCollection $resourceMetadataCollection = null): void
+    private function populateEntrypointProperties(ApiResource $resourceMetadata, string $shortName, string $prefixedShortName, array &$entrypointProperties, ?ResourceMetadataCollection $resourceMetadataCollection = null): void
     {
         $hydraCollectionOperations = $this->getHydraOperations(true, $resourceMetadataCollection);
         if (empty($hydraCollectionOperations)) {
@@ -109,7 +118,7 @@ final class DocumentationNormalizer implements NormalizerInterface, CacheableSup
     /**
      * Gets a Hydra class.
      */
-    private function getClass(string $resourceClass, ApiResource $resourceMetadata, string $shortName, string $prefixedShortName, array $context, ResourceMetadataCollection $resourceMetadataCollection = null): array
+    private function getClass(string $resourceClass, ApiResource $resourceMetadata, string $shortName, string $prefixedShortName, array $context, ?ResourceMetadataCollection $resourceMetadataCollection = null): array
     {
         $description = $resourceMetadata->getDescription();
         $isDeprecated = $resourceMetadata->getDeprecationReason();
@@ -220,12 +229,12 @@ final class DocumentationNormalizer implements NormalizerInterface, CacheableSup
     /**
      * Gets Hydra operations.
      */
-    private function getHydraOperations(bool $collection, ResourceMetadataCollection $resourceMetadataCollection = null): array
+    private function getHydraOperations(bool $collection, ?ResourceMetadataCollection $resourceMetadataCollection = null): array
     {
         $hydraOperations = [];
         foreach ($resourceMetadataCollection as $resourceMetadata) {
             foreach ($resourceMetadata->getOperations() as $operation) {
-                if ((HttpOperation::METHOD_POST === $operation->getMethod() || $operation instanceof CollectionOperationInterface) !== $collection) {
+                if (('POST' === $operation->getMethod() || $operation instanceof CollectionOperationInterface) !== $collection) {
                     continue;
                 }
 
@@ -241,7 +250,7 @@ final class DocumentationNormalizer implements NormalizerInterface, CacheableSup
      */
     private function getHydraOperation(HttpOperation $operation, string $prefixedShortName): array
     {
-        $method = $operation->getMethod() ?: HttpOperation::METHOD_GET;
+        $method = $operation->getMethod() ?: 'GET';
 
         $hydraOperation = $operation->getHydraContext() ?? [];
         if ($operation->getDeprecationReason()) {
@@ -310,7 +319,7 @@ final class DocumentationNormalizer implements NormalizerInterface, CacheableSup
     /**
      * Gets the range of the property.
      */
-    private function getRange(ApiProperty $propertyMetadata): ?string
+    private function getRange(ApiProperty $propertyMetadata): array|string|null
     {
         $jsonldContext = $propertyMetadata->getJsonldContext();
 
@@ -318,47 +327,86 @@ final class DocumentationNormalizer implements NormalizerInterface, CacheableSup
             return $jsonldContext['@type'];
         }
 
-        // TODO: 3.0 support multiple types, default value of types will be [] instead of null
-        $type = $propertyMetadata->getBuiltinTypes()[0] ?? null;
-        if (null === $type) {
+        $builtInTypes = $propertyMetadata->getBuiltinTypes() ?? [];
+        $types = [];
+
+        foreach ($builtInTypes as $type) {
+            if ($type->isCollection() && null !== $collectionType = $type->getCollectionValueTypes()[0] ?? null) {
+                $type = $collectionType;
+            }
+
+            switch ($type->getBuiltinType()) {
+                case Type::BUILTIN_TYPE_STRING:
+                    if (!\in_array('xmls:string', $types, true)) {
+                        $types[] = 'xmls:string';
+                    }
+                    break;
+                case Type::BUILTIN_TYPE_INT:
+                    if (!\in_array('xmls:integer', $types, true)) {
+                        $types[] = 'xmls:integer';
+                    }
+                    break;
+                case Type::BUILTIN_TYPE_FLOAT:
+                    if (!\in_array('xmls:decimal', $types, true)) {
+                        $types[] = 'xmls:decimal';
+                    }
+                    break;
+                case Type::BUILTIN_TYPE_BOOL:
+                    if (!\in_array('xmls:boolean', $types, true)) {
+                        $types[] = 'xmls:boolean';
+                    }
+                    break;
+                case Type::BUILTIN_TYPE_OBJECT:
+                    if (null === $className = $type->getClassName()) {
+                        continue 2;
+                    }
+
+                    if (is_a($className, \DateTimeInterface::class, true)) {
+                        if (!\in_array('xmls:dateTime', $types, true)) {
+                            $types[] = 'xmls:dateTime';
+                        }
+                        break;
+                    }
+
+                    if ($this->resourceClassResolver->isResourceClass($className)) {
+                        $resourceMetadata = $this->resourceMetadataFactory->create($className);
+                        $operation = $resourceMetadata->getOperation();
+
+                        if (!$operation instanceof HttpOperation || !$operation->getTypes()) {
+                            if (!\in_array("#{$operation->getShortName()}", $types, true)) {
+                                $types[] = "#{$operation->getShortName()}";
+                            }
+                            break;
+                        }
+
+                        $types = array_unique(array_merge($types, $operation->getTypes()));
+                        break;
+                    }
+            }
+        }
+
+        if ([] === $types) {
             return null;
         }
 
-        if ($type->isCollection() && null !== $collectionType = $type->getCollectionValueTypes()[0] ?? null) {
-            $type = $collectionType;
+        return 1 === \count($types) ? $types[0] : $types;
+    }
+
+    private function isSingleRelation(ApiProperty $propertyMetadata): bool
+    {
+        $builtInTypes = $propertyMetadata->getBuiltinTypes() ?? [];
+
+        foreach ($builtInTypes as $type) {
+            $className = $type->getClassName();
+            if (!$type->isCollection()
+                && null !== $className
+                && $this->resourceClassResolver->isResourceClass($className)
+            ) {
+                return true;
+            }
         }
 
-        switch ($type->getBuiltinType()) {
-            case Type::BUILTIN_TYPE_STRING:
-                return 'xmls:string';
-            case Type::BUILTIN_TYPE_INT:
-                return 'xmls:integer';
-            case Type::BUILTIN_TYPE_FLOAT:
-                return 'xmls:decimal';
-            case Type::BUILTIN_TYPE_BOOL:
-                return 'xmls:boolean';
-            case Type::BUILTIN_TYPE_OBJECT:
-                if (null === $className = $type->getClassName()) {
-                    return null;
-                }
-
-                if (is_a($className, \DateTimeInterface::class, true)) {
-                    return 'xmls:dateTime';
-                }
-
-                if ($this->resourceClassResolver->isResourceClass($className)) {
-                    $resourceMetadata = $this->resourceMetadataFactory->create($className);
-                    $operation = $resourceMetadata->getOperation();
-
-                    if (!$operation instanceof HttpOperation) {
-                        return "#{$operation->getShortName()}";
-                    }
-
-                    return $operation->getTypes()[0] ?? "#{$operation->getShortName()}";
-                }
-        }
-
-        return null;
+        return false;
     }
 
     /**
@@ -463,11 +511,16 @@ final class DocumentationNormalizer implements NormalizerInterface, CacheableSup
             'domain' => $prefixedShortName,
         ];
 
-        // TODO: 3.0 support multiple types, default value of types will be [] instead of null
-        $type = $propertyMetadata->getBuiltinTypes()[0] ?? null;
+        if ($propertyMetadata->getDeprecationReason()) {
+            $propertyData['owl:deprecated'] = true;
+        }
 
-        if (null !== $type && !$type->isCollection() && (null !== $className = $type->getClassName()) && $this->resourceClassResolver->isResourceClass($className)) {
+        if ($this->isSingleRelation($propertyMetadata)) {
             $propertyData['owl:maxCardinality'] = 1;
+        }
+
+        if (null !== $range = $this->getRange($propertyMetadata)) {
+            $propertyData['range'] = $range;
         }
 
         $property = [
@@ -479,16 +532,8 @@ final class DocumentationNormalizer implements NormalizerInterface, CacheableSup
             'hydra:writeable' => $propertyMetadata->isWritable() || $propertyMetadata->isInitializable(),
         ];
 
-        if (null !== $range = $this->getRange($propertyMetadata)) {
-            $property['hydra:property']['range'] = $range;
-        }
-
         if (null !== $description = $propertyMetadata->getDescription()) {
             $property['hydra:description'] = $description;
-        }
-
-        if ($deprecationReason = $propertyMetadata->getDeprecationReason()) {
-            $property['owl:deprecated'] = true;
         }
 
         return $property;
@@ -539,13 +584,27 @@ final class DocumentationNormalizer implements NormalizerInterface, CacheableSup
     /**
      * {@inheritdoc}
      */
-    public function supportsNormalization(mixed $data, string $format = null, array $context = []): bool
+    public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
     {
         return self::FORMAT === $format && $data instanceof Documentation;
     }
 
+    public function getSupportedTypes($format): array
+    {
+        return self::FORMAT === $format ? [Documentation::class => true] : [];
+    }
+
     public function hasCacheableSupportsMethod(): bool
     {
+        if (method_exists(Serializer::class, 'getSupportedTypes')) {
+            trigger_deprecation(
+                'api-platform/core',
+                '3.1',
+                'The "%s()" method is deprecated, use "getSupportedTypes()" instead.',
+                __METHOD__
+            );
+        }
+
         return true;
     }
 }

@@ -26,7 +26,7 @@ final class ConstraintViolationListNormalizer extends AbstractConstraintViolatio
 {
     public const FORMAT = 'jsonld';
 
-    public function __construct(private readonly UrlGeneratorInterface $urlGenerator, array $serializePayloadFields = null, NameConverterInterface $nameConverter = null)
+    public function __construct(private readonly UrlGeneratorInterface $urlGenerator, ?array $serializePayloadFields = null, ?NameConverterInterface $nameConverter = null)
     {
         parent::__construct($serializePayloadFields, $nameConverter);
     }
@@ -34,9 +34,14 @@ final class ConstraintViolationListNormalizer extends AbstractConstraintViolatio
     /**
      * {@inheritdoc}
      */
-    public function normalize(mixed $object, string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
+    public function normalize(mixed $object, ?string $format = null, array $context = []): array|string|int|float|bool|\ArrayObject|null
     {
         [$messages, $violations] = $this->getMessagesAndViolations($object);
+
+        // TODO: in api platform 4 this will be the default, as right now we serialize a ValidationException instead of a ConstraintViolationList
+        if ($context['rfc_7807_compliant_errors'] ?? false) {
+            return $violations;
+        }
 
         return [
             '@context' => $this->urlGenerator->generate('api_jsonld_context', ['shortName' => 'ConstraintViolationList']),

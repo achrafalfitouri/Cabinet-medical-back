@@ -118,13 +118,15 @@ We strongly recommend the use of a scope on API Platform core.
 
 On `api-platform/core` there are two kinds of tests: unit (`phpunit` through `simple-phpunit`) and integration tests (`behat`).
 
+Note that we stopped using `prophesize` for new tests since 3.2, use `phpunit` stub system.
+
 Both `simple-phpunit` and `behat` are development dependencies and should be available in the `vendor` directory.
 
 #### PHPUnit and Coverage Generation
 
 To launch unit tests:
 
-    vendor/bin/simple-phpunit --stop-on-failure -vvv
+    vendor/bin/simple-phpunit --stop-on-defect -vvv
 
 If you want coverage, you will need the `pcov` PHP extension and run:
 
