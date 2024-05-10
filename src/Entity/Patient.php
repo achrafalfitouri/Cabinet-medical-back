@@ -7,11 +7,16 @@ use ApiPlatform\Metadata\ApiResource;
 use App\Repository\PatientRepository;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
+use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
+use ApiPlatform\Doctrine\Orm\Filter\RangeFilter;
 
 #[ORM\Entity(repositoryClass: PatientRepository::class)]
 #[ApiResource]
 #[ApiFilter(SearchFilter::class, strategy: 'word_start')]
 #[ApiFilter(OrderFilter::class, properties: ['created_at' => 'DESC'])]
+#[ApiFilter(DateFilter::class, properties:['created_at'])]
+
+
 
 class Patient
 {
@@ -31,7 +36,8 @@ class Patient
 
     #[ORM\Column]
     private ?string $age = null;
-
+    
+    
     #[ORM\Column (options: ['default' => 'CURRENT_TIMESTAMP'])]
     private ?\DateTimeImmutable $created_at = null;
 

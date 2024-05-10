@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\ExamentestRepository;
 use Doctrine\DBAL\Types\Types;
@@ -14,6 +15,8 @@ use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 
 #[ORM\Entity(repositoryClass: ExamentestRepository::class)]
 #[ApiResource]
+#[ApiFilter(DateFilter::class, properties:['created_at'])]
+
 #[ApiFilter(SearchFilter::class, properties:[
 
     'id' => SearchFilter::STRATEGY_WORD_START,

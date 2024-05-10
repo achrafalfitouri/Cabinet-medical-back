@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\OrdonanceRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -33,6 +34,7 @@ use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 ])]
 
 #[ApiFilter(OrderFilter::class, properties: ['created_at' => 'DESC'])]
+#[ApiFilter(DateFilter::class, properties: ['created_at'])]
 
 class Ordonance
 {

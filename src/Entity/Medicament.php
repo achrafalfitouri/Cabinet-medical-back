@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Doctrine\Orm\Filter\DateFilter;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\MedicamentRepository;
 use Doctrine\DBAL\Types\Types;
@@ -15,6 +16,7 @@ use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 #[ApiResource]
 #[ApiFilter(SearchFilter::class, strategy: 'word_start')]
 #[ApiFilter(OrderFilter::class, properties: ['created_at' => 'DESC'])]
+#[ApiFilter(DateFilter::class, properties:['created_at'])]
 
 class Medicament
 {

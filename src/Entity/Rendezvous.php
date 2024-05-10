@@ -15,7 +15,7 @@ use ApiPlatform\Doctrine\Orm\Filter\OrderFilter;
 #[ORM\Entity(repositoryClass: RendezvousRepository::class)]
 #[ApiResource]
 #[ApiFilter(SearchFilter::class, strategy: 'word_start')]
-#[ApiFilter(DateFilter::class, strategy: 'null')]
+#[ApiFilter(DateFilter::class, properties:['created_at'])]
 #[ApiFilter(OrderFilter::class, properties: ['created_at' => 'DESC'])]
 
 
